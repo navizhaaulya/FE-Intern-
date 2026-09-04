@@ -4,9 +4,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Pencil } from 'lucide-vue-next'
 
 import { api } from '@/services/api'
-import Navbar from '@/components/Navbar.vue'
-import AdminSidebar from '@/components/AdminSidebar.vue'
-import StatusBadge from '@/components/StatusBadge.vue'
+import Navbar from '@/components/layout/Navbar.vue'
+import AdminSidebar from '@/components/layout/AdminSidebar.vue'
+import StatusBadge from '@/components/UI/StatusBadge.vue'
 
 const route = useRoute()
 const router = useRouter()

@@ -5,8 +5,8 @@ import { ArrowLeft } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 
 import { api } from '@/services/api'
-import Navbar from '@/components/Navbar.vue'
-import AdminSidebar from '@/components/AdminSidebar.vue'
+import Navbar from '@/components/layout/Navbar.vue'
+import AdminSidebar from '@/components/layout/AdminSidebar.vue'
 
 const router = useRouter()
 
