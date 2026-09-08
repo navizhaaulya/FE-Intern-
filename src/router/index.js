@@ -42,7 +42,7 @@ const router = createRouter({
     {
       path: '/events/:slug',
       name: 'event-detail',
-      component: () => import('@/pages/Events/EventDetailPage.vue'),
+      component: () => import('@/pages/events/EventDetailPage.vue'),
     },
 
     {
