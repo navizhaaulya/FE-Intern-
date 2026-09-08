@@ -29,7 +29,8 @@ defineProps({
             class="overflow-hidden rounded-2xl shadow-lg"
           >
             <img
-              src="https://image.idntimes.com/post/20241122/img-20241122-wa0092-40a34a8ca1fa3703fd1fe6c829212b4b.jpg"
+              v-if="about?.img_profile_1"
+              :src="about.img_profile_1"
               alt="Profil Sekolah"
               class="h-80 w-full object-cover"
             >
@@ -39,10 +40,11 @@ defineProps({
             class="overflow-hidden rounded-2xl shadow-lg"
           >
             <img
-              src="https://sin1.contabostorage.com/adef61e95f524badb0b95b15d2c793b7:portal/media/20842/IMG_4293.JPG"
-              alt="Kegiatan Sekolah"
-              class="h-80 w-full object-cover"
-            >
+                v-if="about?.img_profile_2"
+                :src="about.img_profile_2"
+                alt="Kegiatan Sekolah"
+                class="h-80 w-full object-cover"
+              >
           </div>
 
         </div>

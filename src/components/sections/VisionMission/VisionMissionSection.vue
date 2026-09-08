@@ -63,8 +63,6 @@ defineProps({
       class="grid gap-x-24 lg:grid-cols-2"
     >
 
-      <!-- Kolom kiri -->
-
       <div
         class="space-y-12"
       >
@@ -90,8 +88,6 @@ defineProps({
         </div>
 
       </div>
-
-      <!-- Kolom kanan -->
 
       <div
         class="space-y-12"

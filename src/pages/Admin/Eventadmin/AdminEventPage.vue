@@ -1,13 +1,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, Plus, Eye, Trash2 } from 'lucide-vue-next'
+import { Search, Plus } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 
 import { api } from '@/services/api'
 import Navbar from '@/components/layout/Navbar.vue'
 import AdminSidebar from '@/components/layout/AdminSidebar.vue'
-import StatusBadge from '@/components/UI/StatusBadge.vue'
+import DataTable from '@/components/UI/DataTable.vue'
 
 const router = useRouter()
 
@@ -19,25 +19,72 @@ const search = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
+// =====================================================
+// TABLE COLUMNS
+// =====================================================
+
+const columns = [
+  {
+    key: 'img_cover',
+    label: 'Cover',
+    type: 'image',
+  },
+  {
+    key: 'title',
+    label: 'Event',
+  },
+  {
+    key: 'location',
+    label: 'Lokasi',
+  },
+  {
+    key: 'start_date',
+    label: 'Tanggal Mulai',
+    type: 'date',
+  },
+  {
+    key: 'end_date',
+    label: 'Tanggal Selesai',
+    type: 'date',
+  },
+  {
+    key: 'status',
+    label: 'Status',
+    type: 'status',
+  },
+]
+
+// =====================================================
+// GET EVENTS
+// =====================================================
+
 const getEvents = async () => {
   loading.value = true
   error.value = ''
 
   try {
     const response = await api.list('events')
+
     eventList.value = response?.data || []
   } catch (err) {
-    console.error(err)
+    console.error('Error mengambil event:', err)
+
     error.value = 'Gagal mengambil data event.'
   } finally {
     loading.value = false
   }
 }
 
+// =====================================================
+// SEARCH
+// =====================================================
+
 const filteredEvents = computed(() => {
   const keyword = search.value.toLowerCase().trim()
 
-  if (!keyword) return eventList.value
+  if (!keyword) {
+    return eventList.value
+  }
 
   return eventList.value.filter((event) =>
     event.title?.toLowerCase().includes(keyword) ||
@@ -46,12 +93,19 @@ const filteredEvents = computed(() => {
   )
 })
 
-const totalPages = computed(() =>
-  Math.ceil(filteredEvents.value.length / itemsPerPage)
-)
+// =====================================================
+// PAGINATION
+// =====================================================
+
+const totalPages = computed(() => {
+  return Math.ceil(
+    filteredEvents.value.length / itemsPerPage
+  )
+})
 
 const paginatedEvents = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
+  const start =
+    (currentPage.value - 1) * itemsPerPage
 
   return filteredEvents.value.slice(
     start,
@@ -60,9 +114,19 @@ const paginatedEvents = computed(() => {
 })
 
 const changePage = (page) => {
-  if (page < 1 || page > totalPages.value) return
+  if (
+    page < 1 ||
+    page > totalPages.value
+  ) {
+    return
+  }
+
   currentPage.value = page
 }
+
+// =====================================================
+// NAVIGATION
+// =====================================================
 
 const goCreate = () => {
   router.push('/admin/events/create')
@@ -71,6 +135,14 @@ const goCreate = () => {
 const goDetail = (id) => {
   router.push(`/admin/events/${id}`)
 }
+
+const goEdit = (id) => {
+  router.push(`/admin/events/${id}/edit`)
+}
+
+// =====================================================
+// DELETE
+// =====================================================
 
 const deleteEvent = async (id) => {
   const result = await Swal.fire({
@@ -85,7 +157,9 @@ const deleteEvent = async (id) => {
     cancelButtonColor: '#9ca3af',
   })
 
-  if (!result.isConfirmed) return
+  if (!result.isConfirmed) {
+    return
+  }
 
   try {
     await api.delete('events', id)
@@ -102,11 +176,13 @@ const deleteEvent = async (id) => {
       timerProgressBar: true,
     })
   } catch (err) {
-    console.error(err)
+    console.error('Error menghapus event:', err)
 
     Swal.fire({
       title: 'Gagal!',
-      text: err.response?.data?.message || 'Gagal menghapus event.',
+      text:
+        err.response?.data?.message ||
+        'Gagal menghapus event.',
       icon: 'error',
       confirmButtonText: 'OK',
       confirmButtonColor: '#f97316',
@@ -114,15 +190,9 @@ const deleteEvent = async (id) => {
   }
 }
 
-const formatDate = (date) => {
-  if (!date) return '-'
-
-  return new Date(date).toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
+// =====================================================
+// MOUNT
+// =====================================================
 
 onMounted(() => {
   getEvents()
@@ -131,36 +201,86 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-gray-50">
+
     <Navbar />
 
     <div class="flex">
+
       <AdminSidebar />
 
-      <main class="flex-1 p-6">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">
-              Event
-            </h1>
+      <main
+        class="min-w-0 flex-1 px-6 py-8 lg:px-10"
+      >
 
-            <p class="text-sm text-gray-500 mt-1">
-              Kelola event yang tersedia di website.
-            </p>
-          </div>
+        <!-- HEADER -->
+        <div
+          class="mb-4 flex items-center gap-3 rounded-2xl bg-white px-6 py-4 shadow-sm"
+        >
 
           <button
-            @click="goCreate"
-            class="flex items-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+            type="button"
+            @click="router.back()"
+            class="text-2xl text-gray-700 transition hover:text-orange-500"
           >
-            <Plus :size="18" />
-            Tambah Event
+            ‹
           </button>
+
+          <div>
+            <h1
+              class="font-semibold text-gray-800"
+            >
+              Kelola Event
+            </h1>
+          </div>
+
         </div>
 
-        <!-- Search -->
-        <div class="bg-white rounded-xl border border-gray-200 p-4 mb-5">
+
+        <!-- TITLE + ADD -->
+        <section
+          class="mb-4 flex items-center justify-between rounded-xl bg-white px-6 py-4 shadow-sm"
+        >
+
+          <div>
+
+            <h2
+              class="text-xl font-bold text-gray-800"
+            >
+              Daftar Event
+            </h2>
+
+            <p
+              class="mt-1 text-sm text-gray-500"
+            >
+              Kelola event yang ditampilkan
+              pada website.
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            @click="goCreate"
+            class="flex items-center gap-2 rounded-xl bg-orange-400 px-5 py-3 font-semibold text-white transition hover:bg-orange-500"
+          >
+
+            <Plus :size="18" />
+
+            Tambah Event
+
+          </button>
+
+        </section>
+
+
+        <!-- SEARCH -->
+        <div
+          class="mb-5 rounded-xl border border-gray-200 bg-white p-4"
+        >
+
           <div class="relative max-w-md">
+
             <Search
               :size="18"
               class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -171,193 +291,40 @@ onMounted(() => {
               @input="currentPage = 1"
               type="text"
               placeholder="Cari event..."
-              class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
+              class="w-full rounded-lg border border-gray-200 py-2.5 pl-10 pr-4 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
             />
+
           </div>
+
         </div>
 
-        <!-- Error -->
+
+        <!-- ERROR -->
         <div
           v-if="error"
-          class="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 mb-5"
+          class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600"
         >
           {{ error }}
         </div>
 
-        <!-- Table -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-5 py-4 text-left text-sm font-semibold text-gray-600">
-                    No
-                  </th>
 
-                  <th class="px-5 py-4 text-left text-sm font-semibold text-gray-600">
-                    Cover
-                  </th>
+        <!-- REUSABLE TABLE -->
+        <DataTable
+          :columns="columns"
+          :items="paginatedEvents"
+          :loading="loading"
+          :current-page="currentPage"
+          :items-per-page="itemsPerPage"
+          :total-pages="totalPages"
+          @detail="goDetail"
+          @edit="goEdit"
+          @delete="deleteEvent"
+          @page-change="changePage"
+        />
 
-                  <th class="px-5 py-4 text-left text-sm font-semibold text-gray-600">
-                    Event
-                  </th>
-
-                  <th class="px-5 py-4 text-left text-sm font-semibold text-gray-600">
-                    Lokasi
-                  </th>
-
-                  <th class="px-5 py-4 text-left text-sm font-semibold text-gray-600">
-                    Tanggal
-                  </th>
-
-                  <th class="px-5 py-4 text-left text-sm font-semibold text-gray-600">
-                    Status
-                  </th>
-
-                  <th class="px-5 py-4 text-center text-sm font-semibold text-gray-600">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <!-- Loading -->
-                <tr v-if="loading">
-                  <td
-                    colspan="7"
-                    class="px-5 py-10 text-center text-gray-500"
-                  >
-                    Memuat data event...
-                  </td>
-                </tr>
-
-                <!-- Empty -->
-                <tr v-else-if="paginatedEvents.length === 0">
-                  <td
-                    colspan="7"
-                    class="px-5 py-10 text-center text-gray-500"
-                  >
-                    Tidak ada event.
-                  </td>
-                </tr>
-
-                <!-- Data -->
-                <tr
-                  v-for="(event, index) in paginatedEvents"
-                  :key="event.id"
-                  class="border-b border-gray-100 hover:bg-gray-50"
-                >
-                  <td class="px-5 py-4 text-sm text-gray-600">
-                    {{ (currentPage - 1) * itemsPerPage + index + 1 }}
-                  </td>
-
-                  <td class="px-5 py-4">
-                    <img
-                      v-if="event.img_cover"
-                      :src="event.img_cover"
-                      :alt="event.title"
-                      class="w-16 h-10 object-cover rounded-lg"
-                    />
-
-                    <div
-                      v-else
-                      class="w-16 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400"
-                    >
-                      No Image
-                    </div>
-                  </td>
-
-                  <td class="px-5 py-4">
-                    <div class="font-medium text-gray-900">
-                      {{ event.title }}
-                    </div>
-
-                    <div class="text-xs text-gray-400 mt-1">
-                      {{ event.slug }}
-                    </div>
-                  </td>
-
-                  <td class="px-5 py-4 text-sm text-gray-600">
-                    {{ event.location || '-' }}
-                  </td>
-
-                  <td class="px-5 py-4 text-sm text-gray-600">
-                    {{ formatDate(event.start_date) }}
-                    -
-                    {{ formatDate(event.end_date) }}
-                  </td>
-
-                  <td class="px-5 py-4">
-                    <StatusBadge :status="event.status" />
-                  </td>
-
-                  <td class="px-5 py-4">
-                    <div class="flex items-center justify-center gap-2">
-                      <button
-                        @click="goDetail(event.id)"
-                        class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                        title="Detail"
-                      >
-                        <Eye :size="18" />
-                      </button>
-
-                      <button
-                        @click="deleteEvent(event.id)"
-                        class="p-2 rounded-lg text-red-500 hover:bg-red-50"
-                        title="Hapus"
-                      >
-                        <Trash2 :size="18" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Pagination -->
-          <div
-            v-if="totalPages > 1"
-            class="flex items-center justify-between px-5 py-4 border-t border-gray-200"
-          >
-            <p class="text-sm text-gray-500">
-              Halaman {{ currentPage }} dari {{ totalPages }}
-            </p>
-
-            <div class="flex items-center gap-2">
-              <button
-                @click="changePage(currentPage - 1)"
-                :disabled="currentPage === 1"
-                class="px-3 py-2 text-sm border rounded-lg disabled:opacity-40"
-              >
-                Sebelumnya
-              </button>
-
-              <button
-                v-for="page in totalPages"
-                :key="page"
-                @click="changePage(page)"
-                class="w-9 h-9 rounded-lg text-sm"
-                :class="
-                  currentPage === page
-                    ? 'bg-orange-500 text-white'
-                    : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
-                "
-              >
-                {{ page }}
-              </button>
-
-              <button
-                @click="changePage(currentPage + 1)"
-                :disabled="currentPage === totalPages"
-                class="px-3 py-2 text-sm border rounded-lg disabled:opacity-40"
-              >
-                Berikutnya
-              </button>
-            </div>
-          </div>
-        </div>
       </main>
+
     </div>
+
   </div>
 </template>
