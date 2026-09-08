@@ -8,12 +8,9 @@ import LoginPage from '@/pages/LoginPage.vue'
 import ProfilePage from '@/pages/Profile/ProfilePage.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/fe/'),
 
   routes: [
-    // =========================
-    // PUBLIC
-    // =========================
 
     {
       path: '/',
@@ -150,7 +147,7 @@ const router = createRouter({
   },
 },
 {
-  path: '/admin/event/create',
+  path: '/admin/events/create',
   name: 'admin-event-create',
   component: () => import('@/pages/Admin/Eventadmin/AdminAddEvent.vue'),
   meta: {
@@ -159,7 +156,7 @@ const router = createRouter({
   },
 },
 {
-  path: '/admin/event/:id',
+  path: '/admin/events/:id',
   name: 'admin-event-detail',
   component: () => import('@/pages/Admin/Eventadmin/AdminDetailEvent.vue'),
   meta: {
@@ -168,7 +165,7 @@ const router = createRouter({
   },
 },
 {
-  path: '/admin/event/:id/edit',
+  path: '/admin/events/:id/edit',
   name: 'admin-event-edit',
   component: () => import('@/pages/Admin/Eventadmin/AdminEditEvent.vue'),
   meta: {

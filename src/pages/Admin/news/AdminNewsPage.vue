@@ -289,15 +289,9 @@ onMounted(() => {
 
       <AdminSidebar />
 
-      <!-- CONTENT -->
-
       <main
         class="min-w-0 flex-1 px-6 py-8 lg:px-10"
       >
-
-        <!-- ========================= -->
-        <!-- HEADER -->
-        <!-- ========================= -->
 
         <div
           class="mb-4 flex items-center gap-3 rounded-2xl bg-white px-6 py-4 shadow-sm"
@@ -436,11 +430,6 @@ onMounted(() => {
             @delete="deleteNews"
             @page-change="changePage"
           />
-
-
-          <!-- ========================= -->
-          <!-- PAGINATION INFO -->
-          <!-- ========================= -->
 
           <div
             v-if="

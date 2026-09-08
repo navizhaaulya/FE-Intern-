@@ -85,7 +85,7 @@ const submit = async () => {
         <!-- Header -->
         <div class="flex items-center gap-4 mb-6">
           <button
-            @click="router.push('/admin/events')"
+            @click="router.push('/admin/event')"
             class="p-2 rounded-lg hover:bg-gray-200"
           >
             <ArrowLeft :size="20" />

@@ -11,7 +11,7 @@ defineProps({
 
 <template>
   <BaseCard
-  class="group flex h-[260px] flex-col rounded-[24px] border border-[#F4E6D8] bg-[#FEF7F0] p-6 shadow-[0_4px_18px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
+  class="group flex h-[280px] flex-col rounded-[24px] border border-[#F4E6D8] bg-[#FEF7F0] p-6 shadow-[0_4px_18px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
 >
     <!-- Header -->
     <div class="flex items-center gap-4">

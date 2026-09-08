@@ -1,6 +1,5 @@
 <script setup>
 import { computed } from 'vue'
-
 import BaseContainer from '@/components/UI/BaseContainer.vue'
 
 const props = defineProps({
@@ -11,15 +10,14 @@ const props = defineProps({
 })
 
 const embedUrl = computed(() => {
-  // Ganti dengan link YouTube milikmu
-  const url = 'https://youtu.be/tBG3Syy9liY?si=p5Xw3t2d-terXi9z'
+  const url = props.about?.video_profile || ''
 
   if (url.includes('watch?v=')) {
     return url.replace('watch?v=', 'embed/')
   }
 
   if (url.includes('youtu.be/')) {
-    const id = url.split('youtu.be/')[1]
+    const id = url.split('youtu.be/')[1].split('?')[0]
     return `https://www.youtube.com/embed/${id}`
   }
 
