@@ -8,7 +8,7 @@ import LoginPage from '@/pages/LoginPage.vue'
 import ProfilePage from '@/pages/Profile/ProfilePage.vue'
 
 const router = createRouter({
-  history: createWebHistory('/fe/'),
+  history: createWebHistory('/'),
 
   routes: [
 
