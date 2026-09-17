@@ -26,9 +26,9 @@ const getBanner = async () => {
     )
 
     console.log('Detail Banner:', response)
+    console.log('IMG COVER:', response?.data?.img_cover)
 
     banner.value = response?.data || response
-
   } catch (err) {
     console.error('Error mengambil detail banner:', err)
 
@@ -38,6 +38,31 @@ const getBanner = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const getImageUrl = (image) => {
+  if (!image) return ''
+
+  // Kalau backend sudah memberikan object img_cover
+  const url =
+    typeof image === 'object'
+      ? image.url
+      : image
+
+  if (!url) return ''
+
+  // Kalau sudah URL lengkap
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://')
+  ) {
+    return url
+  }
+
+  // Ambil base URL API dari .env
+  const baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, '')
+
+  return `${baseUrl}/${url.replace(/^\//, '')}`
 }
 
 const goToEdit = () => {
@@ -148,11 +173,18 @@ onMounted(() => {
                   </span>
 
                   <img
-                    v-else
-                    :src="banner.img_cover"
+                    v-else-if="getImageUrl(banner.img_cover)"
+                    :src="getImageUrl(banner.img_cover)"
                     :alt="banner.title || 'Banner'"
                     class="mt-1 h-32 w-56 rounded-xl object-cover"
                   />
+
+                  <span
+                    v-else
+                    class="text-gray-400"
+                  >
+                    : Gambar tidak tersedia
+                  </span>
 
                 </div>
               </div>
@@ -168,6 +200,7 @@ onMounted(() => {
 
                 <span class="break-all text-gray-800">
                   :
+
                   <a
                     v-if="banner.url"
                     :href="banner.url"
@@ -240,8 +273,8 @@ onMounted(() => {
             >
 
               <img
-                v-if="banner.img_cover"
-                :src="banner.img_cover"
+                v-if="getImageUrl(banner.img_cover)"
+                :src="getImageUrl(banner.img_cover)"
                 :alt="banner.title || 'Banner'"
                 class="max-h-[500px] w-full object-cover"
               />

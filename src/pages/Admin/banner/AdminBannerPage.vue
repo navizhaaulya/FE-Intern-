@@ -7,6 +7,7 @@ import { api } from '@/services/api'
 import Navbar from '@/components/layout/Navbar.vue'
 import AdminSidebar from '@/components/layout/AdminSidebar.vue'
 import DataTable from '@/components/UI/DataTable.vue'
+import Swal from 'sweetalert2'
 
 const router = useRouter()
 
@@ -44,6 +45,7 @@ const getBanners = async () => {
     const response = await api.list('banner')
 
     console.log('Response API Banner:', response)
+    
 
     bannerList.value = response?.data || []
   } catch (err) {
@@ -96,23 +98,44 @@ const goToEdit = (id) => {
 }
 
 const deleteBanner = async (id) => {
-  const confirmed = confirm(
-    'Yakin ingin menghapus banner ini?'
-  )
+  const result = await Swal.fire({
+    title: 'Hapus banner?',
+    text: 'Data banner yang dihapus tidak dapat dikembalikan.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, hapus',
+    cancelButtonText: 'Batal',
+    confirmButtonColor: '#f97316',
+    cancelButtonColor: '#6b7280',
+    reverseButtons: true,
+  })
 
-  if (!confirmed) return
+  if (!result.isConfirmed) return
 
   try {
-    await api.delete('banners', id)
+    await api.delete('banner', id)
 
     await getBanners()
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Banner berhasil dihapus.',
+      timer: 1500,
+      showConfirmButton: false,
+      timerProgressBar: true,
+    })
   } catch (err) {
     console.error('Error menghapus banner:', err)
 
-    alert(
-      err.response?.data?.message ||
-      'Gagal menghapus banner'
-    )
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text:
+        err.response?.data?.message ||
+        'Gagal menghapus banner.',
+      confirmButtonColor: '#f97316',
+    })
   }
 }
 

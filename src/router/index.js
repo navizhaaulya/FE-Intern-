@@ -51,7 +51,7 @@ const router = createRouter({
     {
       path: '/votings',
       name: 'voting',
-      component: () => import('@/pages/Voting/VotingPage.vue'),
+      component: () => import('@/pages/Admin/VisiMisi/VisiMisiAdmin.vue'),
     },
 
     {
@@ -94,6 +94,61 @@ const router = createRouter({
   path: '/admin/banner',
   name: 'admin-banners',
   component: () => import('@/pages/Admin/banner/AdminBannerPage.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+    {
+  path: '/admin/banners/create',
+  name: 'admin-banners-create',
+  component: () => import('@/pages/Admin/banner/AdminAddBanner.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+    {
+  path: '/admin/banners/:id',
+  name: 'admin-banners-detail',
+  component: () => import('@/pages/Admin/banner/AdminDetailBanner.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+    {
+  path: '/admin/banners/:id/edit',
+  name: 'admin-banners-edit',
+  component: () => import('@/pages/Admin/banner/AdminEditBanner.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+
+{
+  path: '/admin/profile',
+  name: 'admin-profile',
+  component: () => import('@/pages/Admin/GlobalConfig/ProfileAdmin.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+{
+  path: '/admin/vision',
+  name: 'admin-vision',
+  component: () => import('@/pages/Admin/VisiMisi/VisiMisiAdmin.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+{
+  path: '/admin/video',
+  name: 'admin-video',
+  component: () => import('@/pages/Admin/GlobalConfig/VideoProfile.vue'),
   meta: {
     requiresAuth: true,
     role: 'admin',
@@ -168,6 +223,42 @@ const router = createRouter({
   path: '/admin/events/:id/edit',
   name: 'admin-event-edit',
   component: () => import('@/pages/Admin/Eventadmin/AdminEditEvent.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+{
+  path: '/admin/voting',
+  name: 'admin-voting',
+  component: () => import('@/pages/Admin/Voting/VotingListAdmin.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+{
+  path: '/admin/voting/create',
+  name: 'admin-voting-create',
+  component: () => import('@/pages/Admin/Voting/AddVoteAdmin.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+{
+  path: '/admin/voting/:id',
+  name: 'admin-voting-detail',
+  component: () => import('@/pages/Admin/Voting/DetailVote.vue'),
+  meta: {
+    requiresAuth: true,
+    role: 'admin',
+  },
+},
+{
+  path: '/admin/feedback',
+  name: 'admin-feedback',
+  component: () => import('@/pages/Admin/Feedback/FeedbackAdmin.vue'),
   meta: {
     requiresAuth: true,
     role: 'admin',

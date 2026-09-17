@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { Upload, X } from 'lucide-vue-next'
+import { Upload, X, LoaderCircle } from 'lucide-vue-next'
+import { api } from '@/services/api'
 
 const props = defineProps({
   modelValue: {
@@ -25,8 +26,9 @@ const emit = defineEmits([
 ])
 
 const fileInput = ref(null)
-const preview = ref(props.modelValue || '')
+const preview = ref('')
 const error = ref('')
+const uploading = ref(false)
 
 watch(
   () => props.modelValue,
@@ -34,14 +36,17 @@ watch(
     if (!value) {
       preview.value = ''
     }
-  }
+  },
+  { immediate: true }
 )
 
 const openFilePicker = () => {
-  fileInput.value?.click()
+  if (!uploading.value) {
+    fileInput.value?.click()
+  }
 }
 
-const handleFile = (event) => {
+const handleFile = async (event) => {
   const file = event.target.files?.[0]
 
   if (!file) return
@@ -62,16 +67,42 @@ const handleFile = (event) => {
     return
   }
 
-  const reader = new FileReader()
+  // Preview lokal
+  preview.value = URL.createObjectURL(file)
 
-  reader.onload = () => {
-    preview.value = reader.result
+  try {
+    uploading.value = true
 
-    emit('update:modelValue', reader.result)
+    const response = await api.upload(file)
+
+    console.log('Response Upload:', response)
+
+    if (!response?.success) {
+      throw new Error(
+        response?.message || 'Gagal mengupload gambar.'
+      )
+    }
+
+    // Simpan PATH hasil upload ke form
+    emit('update:modelValue', response.path)
+
+    // Tetap kirim file kalau parent membutuhkannya
     emit('file-selected', file)
-  }
 
-  reader.readAsDataURL(file)
+  } catch (err) {
+    console.error('Error upload gambar:', err)
+
+    error.value =
+      err.response?.data?.message ||
+      err.message ||
+      'Gagal mengupload gambar.'
+
+    preview.value = ''
+    emit('update:modelValue', '')
+  } finally {
+    uploading.value = false
+    event.target.value = ''
+  }
 }
 
 const removeImage = () => {
@@ -117,12 +148,13 @@ const removeImage = () => {
         </div>
 
         <button
-          type="button"
-          @click="openFilePicker"
-          class="rounded-lg border border-orange-300 bg-orange-50 px-8 py-2 text-sm font-medium text-orange-400 transition hover:bg-orange-100"
-        >
-          Pilih file
-        </button>
+  type="button"
+  @click="openFilePicker"
+  :disabled="uploading"
+  class="rounded-lg border border-orange-300 bg-orange-50 px-8 py-2 text-sm font-medium text-orange-400 transition hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  {{ uploading ? 'Mengupload...' : 'Pilih file' }}
+</button>
 
       </div>
     </div>

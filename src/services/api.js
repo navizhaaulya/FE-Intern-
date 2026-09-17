@@ -18,4 +18,17 @@ export const api = {
 
   dataset: (model, params = {}) =>
     http.get(`/${model}/dataset`, { params }).then((res) => res.data),
+
+  upload: (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    return http
+      .post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then((res) => res.data)
+  },
 }

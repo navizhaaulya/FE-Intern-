@@ -14,7 +14,7 @@ const props = defineProps({
 
 const form = reactive({
   sender_name: '',
-  type: true,
+  type: false, // ⬅️ default ke Kritik (false), sebelumnya true
   category_id: '',
   message: ''
 })
@@ -67,7 +67,7 @@ const submit = async () => {
     })
 
     form.sender_name = ''
-    form.type = true
+    form.type = false // ⬅️ sebelumnya true
     form.category_id = ''
     form.message = ''
   } catch (err) {
@@ -116,7 +116,7 @@ const submit = async () => {
         <label class="flex items-center gap-2">
           <input
             v-model="form.type"
-            :value="true"
+            :value="false"
             type="radio"
           >
           Kritik
@@ -125,7 +125,7 @@ const submit = async () => {
         <label class="flex items-center gap-2">
           <input
             v-model="form.type"
-            :value="false"
+            :value="true"
             type="radio"
           >
           Saran
@@ -216,4 +216,4 @@ const submit = async () => {
     </BaseButton>
 
   </form>
-</template>
+</template> 
