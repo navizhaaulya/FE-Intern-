@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 defineProps({
   to: String,
   href: String,
-  isScrolled: Boolean
+  isScrolled: Boolean,
 })
 </script>
 
@@ -14,9 +14,7 @@ defineProps({
     :to="to"
     :class="[
       'font-medium transition',
-      isScrolled
-        ? 'text-slate-700 hover:text-orange-500'
-        : 'text-white hover:text-orange-300'
+      isScrolled ? 'text-slate-700 hover:text-orange-500' : 'text-white hover:text-orange-300',
     ]"
   >
     <slot />
@@ -27,9 +25,7 @@ defineProps({
     :href="href"
     :class="[
       'font-medium transition',
-      isScrolled
-        ? 'text-slate-700 hover:text-orange-500'
-        : 'text-white hover:text-orange-300'
+      isScrolled ? 'text-slate-700 hover:text-orange-500' : 'text-white hover:text-orange-300',
     ]"
   >
     <slot />

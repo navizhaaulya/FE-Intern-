@@ -6,39 +6,26 @@ import { ChevronDown, ChevronRight } from 'lucide-vue-next'
 defineProps({
   majors: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
 
-  isScrolled: Boolean
+  isScrolled: Boolean,
 })
 
 const showDropdown = ref(false)
 </script>
 
 <template>
-
-  <div
-    class="relative"
-    @mouseenter="showDropdown = true"
-    @mouseleave="showDropdown = false"
-  >
-
+  <div class="relative" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
     <button
       class="flex items-center gap-1 font-medium transition"
       :class="
-        isScrolled
-          ? 'text-slate-700 hover:text-orange-500'
-          : 'text-white hover:text-orange-300'
+        isScrolled ? 'text-slate-700 hover:text-orange-500' : 'text-white hover:text-orange-300'
       "
     >
-    Kompetensi Keahlian
+      Kompetensi Keahlian
 
-      <ChevronDown
-        :size="18"
-        class="transition"
-        :class="{ 'rotate-180': showDropdown }"
-      />
-
+      <ChevronDown :size="18" class="transition" :class="{ 'rotate-180': showDropdown }" />
     </button>
 
     <Transition
@@ -49,36 +36,23 @@ const showDropdown = ref(false)
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-
       <div
         v-if="showDropdown"
         class="absolute left-1/2 top-full z-50 mt-4 w-[360px] -translate-x-1/2 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-100"
       >
-
         <div class="grid grid-cols-2 gap-2">
-
           <RouterLink
             v-for="major in majors"
             :key="major.id"
             :to="`/majors/${major.slug}`"
             class="group flex items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-orange-50 hover:text-orange-500"
           >
-
             {{ major.code }}
 
-            <ChevronRight
-              :size="16"
-              class="transition group-hover:translate-x-1"
-            />
-
+            <ChevronRight :size="16" class="transition group-hover:translate-x-1" />
           </RouterLink>
-
         </div>
-
       </div>
-
     </Transition>
-
   </div>
-
 </template>

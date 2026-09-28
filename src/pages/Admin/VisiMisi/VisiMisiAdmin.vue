@@ -29,8 +29,7 @@ const getConfig = async () => {
     }
   } catch (err) {
     console.error('Gagal mengambil global config:', err)
-    error.value =
-      err.response?.data?.message || err.message || 'Gagal mengambil data config'
+    error.value = err.response?.data?.message || err.message || 'Gagal mengambil data config'
   } finally {
     loading.value = false
   }
@@ -274,20 +273,32 @@ onMounted(() => {
                   </tr>
 
                   <tr
-                    v-for="(mission, index) in (form.missions || [])"
+                    v-for="(mission, index) in form.missions || []"
                     :key="index"
                     class="border-b border-gray-100 text-sm text-gray-700"
                   >
                     <td class="px-3 py-4">{{ index + 1 }}.</td>
                     <td class="px-3 py-4">
                       <div class="flex items-center gap-2">
-                        <button @click="openView(index)" class="rounded-lg p-1.5 text-sky-500 hover:bg-sky-50" title="Detail">
+                        <button
+                          @click="openView(index)"
+                          class="rounded-lg p-1.5 text-sky-500 hover:bg-sky-50"
+                          title="Detail"
+                        >
                           <Eye :size="16" />
                         </button>
-                        <button @click="openEdit(index)" class="rounded-lg p-1.5 text-orange-500 hover:bg-orange-50" title="Edit">
+                        <button
+                          @click="openEdit(index)"
+                          class="rounded-lg p-1.5 text-orange-500 hover:bg-orange-50"
+                          title="Edit"
+                        >
                           <Pencil :size="16" />
                         </button>
-                        <button @click="deleteMission(index)" class="rounded-lg p-1.5 text-red-500 hover:bg-red-50" title="Hapus">
+                        <button
+                          @click="deleteMission(index)"
+                          class="rounded-lg p-1.5 text-red-500 hover:bg-red-50"
+                          title="Hapus"
+                        >
                           <Trash2 :size="16" />
                         </button>
                       </div>
@@ -309,7 +320,13 @@ onMounted(() => {
           <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-lg">
             <div class="mb-4 flex items-center justify-between">
               <h3 class="text-lg font-bold text-gray-800">
-                {{ modalMode === 'add' ? 'Tambah Misi' : modalMode === 'edit' ? 'Edit Misi' : 'Detail Misi' }}
+                {{
+                  modalMode === 'add'
+                    ? 'Tambah Misi'
+                    : modalMode === 'edit'
+                      ? 'Edit Misi'
+                      : 'Detail Misi'
+                }}
               </h3>
               <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
                 <X :size="20" />
@@ -339,7 +356,10 @@ onMounted(() => {
             </div>
 
             <div class="mt-6 flex justify-end gap-2">
-              <button @click="closeModal" class="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50">
+              <button
+                @click="closeModal"
+                class="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+              >
                 {{ modalMode === 'view' ? 'Tutup' : 'Batal' }}
               </button>
               <button

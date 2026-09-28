@@ -19,21 +19,15 @@ const getNews = async () => {
   try {
     loading.value = true
 
-    const response = await api.detail(
-      'news',
-      route.params.id
-    )
+    const response = await api.detail('news', route.params.id)
 
     console.log('Detail News:', response)
 
     news.value = response?.data || response
-
   } catch (err) {
     console.error('Error mengambil detail berita:', err)
 
-    error.value =
-      err.response?.data?.message ||
-      'Gagal mengambil detail berita.'
+    error.value = err.response?.data?.message || 'Gagal mengambil detail berita.'
   } finally {
     loading.value = false
   }
@@ -42,15 +36,12 @@ const getNews = async () => {
 const formatDate = (date) => {
   if (!date) return '-'
 
-  return new Date(date).toLocaleDateString(
-    'id-ID',
-    {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }
-  )
+  return new Date(date).toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 
 const goToEdit = () => {
@@ -64,18 +55,14 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-[#f8f7f6]">
-
     <Navbar />
 
     <div class="flex">
-
       <AdminSidebar />
 
       <main class="min-w-0 flex-1 px-6 py-8 lg:px-10">
-
         <!-- BACK -->
         <div class="mb-5 rounded-2xl bg-white px-6 py-5 shadow-sm">
-
           <button
             @click="router.back()"
             class="flex items-center gap-3 text-sm font-medium text-gray-700 hover:text-orange-500"
@@ -83,36 +70,24 @@ onMounted(() => {
             <ArrowLeft :size="18" />
             Kembali
           </button>
-
         </div>
 
         <!-- LOADING -->
-        <div
-          v-if="loading"
-          class="rounded-2xl bg-white py-20 text-center text-gray-500"
-        >
+        <div v-if="loading" class="rounded-2xl bg-white py-20 text-center text-gray-500">
           Memuat detail berita...
         </div>
 
         <!-- ERROR -->
-        <div
-          v-else-if="error"
-          class="rounded-2xl bg-white py-20 text-center text-red-500"
-        >
+        <div v-else-if="error" class="rounded-2xl bg-white py-20 text-center text-red-500">
           {{ error }}
         </div>
 
         <!-- DETAIL -->
         <div v-else-if="news">
-
           <!-- DATA -->
           <section class="mb-5 rounded-2xl bg-white p-7 shadow-sm">
-
             <div class="mb-5 flex items-center justify-between">
-
-              <h1 class="text-2xl font-bold text-gray-800">
-                Detail Data
-              </h1>
+              <h1 class="text-2xl font-bold text-gray-800">Detail Data</h1>
 
               <button
                 @click="goToEdit"
@@ -121,32 +96,22 @@ onMounted(() => {
                 <Pencil :size="15" />
                 Edit
               </button>
-
             </div>
 
             <div class="divide-y divide-gray-100">
-
               <!-- JUDUL -->
               <div class="grid grid-cols-[200px_1fr] py-4 text-sm">
-                <span class="text-gray-700">
-                  Judul
-                </span>
+                <span class="text-gray-700"> Judul </span>
 
-                <span class="text-gray-800">
-                  : {{ news.title || '-' }}
-                </span>
+                <span class="text-gray-800"> : {{ news.title || '-' }} </span>
               </div>
 
               <!-- COVER -->
               <div class="grid grid-cols-[200px_1fr] py-4 text-sm">
-                <span>
-                  Cover Berita
-                </span>
+                <span> Cover Berita </span>
 
                 <div>
-                  <span v-if="!news.img_cover">
-                    : -
-                  </span>
+                  <span v-if="!news.img_cover"> : - </span>
 
                   <img
                     v-else
@@ -159,42 +124,28 @@ onMounted(() => {
 
               <!-- PENULIS -->
               <div class="grid grid-cols-[200px_1fr] py-4 text-sm">
-                <span>
-                  Penulis
-                </span>
+                <span> Penulis </span>
 
                 <span>
                   :
-                  {{
-                    news.rel_created_by ||
-                    news.created_by ||
-                    'Admin'
-                  }}
+                  {{ news.rel_created_by || news.created_by || 'Admin' }}
                 </span>
               </div>
 
               <!-- STATUS -->
               <div class="grid grid-cols-[200px_1fr] py-4 text-sm">
-                <span>
-                  Status
-                </span>
+                <span> Status </span>
 
                 <span class="flex items-center gap-2">
                   :
-                  <StatusBadge
-                    :status="news.status"
-                    type="news"
-                  />
+                  <StatusBadge :status="news.status" type="news" />
                 </span>
               </div>
-
             </div>
-
           </section>
 
           <!-- ARTICLE -->
           <article class="rounded-2xl bg-white p-8 shadow-sm">
-
             <!-- DATE -->
             <p class="mb-5 text-sm text-gray-500">
               {{ formatDate(news.created_at) }}
@@ -207,7 +158,6 @@ onMounted(() => {
 
             <!-- AUTHOR -->
             <div class="mb-8 flex items-center gap-3">
-
               <div
                 class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-200 font-semibold text-orange-700"
               >
@@ -215,12 +165,8 @@ onMounted(() => {
               </div>
 
               <span class="font-medium text-gray-800">
-                {{
-                  news.rel_created_by ||
-                  'Admin'
-                }}
+                {{ news.rel_created_by || 'Admin' }}
               </span>
-
             </div>
 
             <!-- COVER -->
@@ -232,19 +178,12 @@ onMounted(() => {
             />
 
             <!-- CONTENT -->
-            <div
-              class="prose max-w-none whitespace-pre-line text-sm leading-7 text-gray-700"
-            >
+            <div class="prose max-w-none whitespace-pre-line text-sm leading-7 text-gray-700">
               {{ news.content }}
             </div>
-
           </article>
-
         </div>
-
       </main>
-
     </div>
-
   </div>
 </template>

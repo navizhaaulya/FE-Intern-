@@ -84,30 +84,20 @@ const submit = async () => {
       <main class="flex-1 p-6">
         <!-- Header -->
         <div class="flex items-center gap-4 mb-6">
-          <button
-            @click="router.push('/admin/events')"
-            class="p-2 rounded-lg hover:bg-gray-200"
-          >
+          <button @click="router.push('/admin/events')" class="p-2 rounded-lg hover:bg-gray-200">
             <ArrowLeft :size="20" />
           </button>
 
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">
-              Tambah Event
-            </h1>
+            <h1 class="text-2xl font-bold text-gray-900">Tambah Event</h1>
 
-            <p class="text-sm text-gray-500 mt-1">
-              Tambahkan event baru.
-            </p>
+            <p class="text-sm text-gray-500 mt-1">Tambahkan event baru.</p>
           </div>
         </div>
 
         <!-- Form -->
         <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <form
-            @submit.prevent="submit"
-            class="space-y-5"
-          >
+          <form @submit.prevent="submit" class="space-y-5">
             <!-- Slug -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -152,9 +142,7 @@ const submit = async () => {
 
             <!-- Location -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Lokasi
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-2"> Lokasi </label>
 
               <input
                 v-model="form.location"
@@ -193,9 +181,7 @@ const submit = async () => {
 
             <!-- Image -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Cover Image
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-2"> Cover Image </label>
 
               <input
                 v-model="form.img_cover"
@@ -204,16 +190,12 @@ const submit = async () => {
                 class="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
               />
 
-              <p class="text-xs text-gray-400 mt-1">
-                Untuk sementara masukkan URL gambar.
-              </p>
+              <p class="text-xs text-gray-400 mt-1">Untuk sementara masukkan URL gambar.</p>
             </div>
 
             <!-- Status -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Status
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-2"> Status </label>
 
               <select
                 v-model="form.status"
@@ -227,19 +209,9 @@ const submit = async () => {
 
             <!-- Highlight -->
             <div class="flex items-center gap-3">
-              <input
-                id="highlight"
-                v-model="form.is_highlight"
-                type="checkbox"
-                class="w-4 h-4"
-              />
+              <input id="highlight" v-model="form.is_highlight" type="checkbox" class="w-4 h-4" />
 
-              <label
-                for="highlight"
-                class="text-sm text-gray-700"
-              >
-                Jadikan event highlight
-              </label>
+              <label for="highlight" class="text-sm text-gray-700"> Jadikan event highlight </label>
             </div>
 
             <!-- Buttons -->

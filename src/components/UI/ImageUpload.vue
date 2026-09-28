@@ -20,10 +20,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits([
-  'update:modelValue',
-  'file-selected',
-])
+const emit = defineEmits(['update:modelValue', 'file-selected'])
 
 const fileInput = ref(null)
 const preview = ref('')
@@ -78,9 +75,7 @@ const handleFile = async (event) => {
     console.log('Response Upload:', response)
 
     if (!response?.success) {
-      throw new Error(
-        response?.message || 'Gagal mengupload gambar.'
-      )
+      throw new Error(response?.message || 'Gagal mengupload gambar.')
     }
 
     // Simpan PATH hasil upload ke form
@@ -88,14 +83,10 @@ const handleFile = async (event) => {
 
     // Tetap kirim file kalau parent membutuhkannya
     emit('file-selected', file)
-
   } catch (err) {
     console.error('Error upload gambar:', err)
 
-    error.value =
-      err.response?.data?.message ||
-      err.message ||
-      'Gagal mengupload gambar.'
+    error.value = err.response?.data?.message || err.message || 'Gagal mengupload gambar.'
 
     preview.value = ''
     emit('update:modelValue', '')
@@ -119,52 +110,34 @@ const removeImage = () => {
 
 <template>
   <div>
-
     <!-- UPLOAD BOX -->
-    <div
-      v-if="!preview"
-      class="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-7"
-    >
+    <div v-if="!preview" class="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-7">
       <div class="flex items-center justify-between gap-6">
-
         <div class="flex items-center gap-5">
-
-          <div
-            class="flex h-12 w-12 shrink-0 items-center justify-center text-gray-400"
-          >
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center text-gray-400">
             <Upload :size="38" />
           </div>
 
           <div>
-            <p class="text-sm font-medium text-gray-600">
-              Pilih file atau seret gambar di sini
-            </p>
+            <p class="text-sm font-medium text-gray-600">Pilih file atau seret gambar di sini</p>
 
-            <p class="mt-1 text-xs text-gray-500">
-              JPG, PNG, WebP, maks. {{ maxSize }}MB
-            </p>
+            <p class="mt-1 text-xs text-gray-500">JPG, PNG, WebP, maks. {{ maxSize }}MB</p>
           </div>
-
         </div>
 
         <button
-  type="button"
-  @click="openFilePicker"
-  :disabled="uploading"
-  class="rounded-lg border border-orange-300 bg-orange-50 px-8 py-2 text-sm font-medium text-orange-400 transition hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
->
-  {{ uploading ? 'Mengupload...' : 'Pilih file' }}
-</button>
-
+          type="button"
+          @click="openFilePicker"
+          :disabled="uploading"
+          class="rounded-lg border border-orange-300 bg-orange-50 px-8 py-2 text-sm font-medium text-orange-400 transition hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {{ uploading ? 'Mengupload...' : 'Pilih file' }}
+        </button>
       </div>
     </div>
 
     <!-- PREVIEW -->
-    <div
-      v-else
-      class="relative w-fit"
-    >
-
+    <div v-else class="relative w-fit">
       <img
         :src="preview"
         alt="Preview cover"
@@ -179,24 +152,13 @@ const removeImage = () => {
       >
         <X :size="15" />
       </button>
-
     </div>
 
     <!-- ERROR -->
-    <p
-      v-if="error"
-      class="mt-2 text-xs text-red-500"
-    >
+    <p v-if="error" class="mt-2 text-xs text-red-500">
       {{ error }}
     </p>
 
-    <input
-      ref="fileInput"
-      type="file"
-      :accept="accept"
-      class="hidden"
-      @change="handleFile"
-    />
-
+    <input ref="fileInput" type="file" :accept="accept" class="hidden" @change="handleFile" />
   </div>
 </template>

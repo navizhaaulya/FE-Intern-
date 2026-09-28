@@ -52,8 +52,7 @@ const getConfig = async () => {
     })
   } catch (err) {
     console.error('Gagal mengambil global config:', err)
-    error.value =
-      err.response?.data?.message || err.message || 'Gagal mengambil data config'
+    error.value = err.response?.data?.message || err.message || 'Gagal mengambil data config'
   } finally {
     loading.value = false
   }
@@ -169,13 +168,12 @@ onMounted(() => {
                     :src="existingPreview[field]"
                     class="h-44 w-72 rounded-xl border border-gray-200 object-cover"
                   />
-                  <p class="mt-1 text-xs text-gray-400">Gambar saat ini. Upload baru untuk mengganti.</p>
+                  <p class="mt-1 text-xs text-gray-400">
+                    Gambar saat ini. Upload baru untuk mengganti.
+                  </p>
                 </div>
 
-                <ImageUpload
-                  v-model="form[field]"
-                  @update:modelValue="onImageChanged(field)"
-                />
+                <ImageUpload v-model="form[field]" @update:modelValue="onImageChanged(field)" />
               </div>
             </div>
           </div>

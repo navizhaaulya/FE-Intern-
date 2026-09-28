@@ -22,42 +22,23 @@ const { data: majors } = useFetch(publicApi.getMajors)
 const { data: events } = useFetch(publicApi.getEvents)
 const { data: news } = useFetch(publicApi.getNews)
 const { data: votings } = useFetch(publicApi.getVoting)
-const { data: feedbackCategories } = useFetch(publicApi.getFeedbackCategories
-)
+const { data: feedbackCategories } = useFetch(publicApi.getFeedbackCategories)
 const { data: footer } = useFetch(publicApi.getFooter)
-
 </script>
 
 <template>
   <Navbar />
 
-  <HeroSection
-    :banners="banners"
-    :about="about"
-  />
-  <AboutSection 
-    :about="about"
-    />
-   <VisionMissionSection
-    :visionMission="visionMission"
-    />
-    <StatisticSection />
-    <VideoProfile
-    :about="about" />
-    <MajorSection
-    :majors="majors" />
-    <EventSection
-    :events="events" />
-    <NewsSection
-  :news="news" />
-  <VotingSection
-  :votings="votings"
-/>
-<FeedbackSection 
-:categories="feedbackCategories" />
+  <HeroSection :banners="banners" :about="about" />
+  <AboutSection :about="about" />
+  <VisionMissionSection :visionMission="visionMission" />
+  <StatisticSection />
+  <VideoProfile :about="about" />
+  <MajorSection :majors="majors" />
+  <EventSection :events="events" />
+  <NewsSection :news="news" />
+  <VotingSection :votings="votings" />
+  <FeedbackSection :categories="feedbackCategories" />
 
-    <Footer
-    v-if="footer"
-    :footer="footer"
-    :majors="majors" />
+  <Footer v-if="footer" :footer="footer" :majors="majors" />
 </template>

@@ -7,15 +7,14 @@ import FeedbackForm from './FeedbackForm.vue'
 defineProps({
   categories: {
     type: Array,
-    default: () => []
-  }
+    default: () => [],
+  },
 })
 </script>
 
 <template>
   <section class="bg-[#FFF8F3] py-28">
     <BaseContainer>
-
       <SectionTitle
         title="Kritik & Saran"
         subtitle="Sampaikan Kritik dan Saran Anda."
@@ -27,11 +26,8 @@ defineProps({
       >
         <FeedbackIllustration />
 
-        <FeedbackForm
-          :categories="categories"
-        />
+        <FeedbackForm :categories="categories" />
       </div>
-
     </BaseContainer>
   </section>
 </template>

@@ -48,11 +48,7 @@ const updateContent = () => {
 const changeTextColor = () => {
   editor.value?.focus()
 
-  document.execCommand(
-    'foreColor',
-    false,
-    textColor.value
-  )
+  document.execCommand('foreColor', false, textColor.value)
 
   updateContent()
 }
@@ -80,11 +76,7 @@ const handleImageUpload = (event) => {
   reader.onload = () => {
     editor.value?.focus()
 
-    document.execCommand(
-      'insertImage',
-      false,
-      reader.result
-    )
+    document.execCommand('insertImage', false, reader.result)
 
     updateContent()
   }
@@ -129,15 +121,11 @@ initEditor()
   <div
     class="overflow-hidden rounded-xl border border-gray-200 bg-white focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100"
   >
-
     <!-- ========================= -->
     <!-- TOOLBAR -->
     <!-- ========================= -->
 
-    <div
-      class="flex flex-wrap items-center gap-1 border-b border-gray-200 bg-gray-50 px-3 py-2"
-    >
-
+    <div class="flex flex-wrap items-center gap-1 border-b border-gray-200 bg-gray-50 px-3 py-2">
       <!-- BOLD -->
 
       <button
@@ -149,7 +137,6 @@ initEditor()
       >
         <Bold :size="17" />
       </button>
-
 
       <!-- ITALIC -->
 
@@ -163,7 +150,6 @@ initEditor()
         <Italic :size="17" />
       </button>
 
-
       <!-- UNDERLINE -->
 
       <button
@@ -176,9 +162,7 @@ initEditor()
         <Underline :size="17" />
       </button>
 
-
       <div class="mx-1 h-6 w-px bg-gray-300"></div>
-
 
       <!-- BULLET -->
 
@@ -192,7 +176,6 @@ initEditor()
         <List :size="17" />
       </button>
 
-
       <!-- NUMBER -->
 
       <button
@@ -205,9 +188,7 @@ initEditor()
         <ListOrdered :size="17" />
       </button>
 
-
       <div class="mx-1 h-6 w-px bg-gray-300"></div>
-
 
       <!-- ALIGN LEFT -->
 
@@ -221,7 +202,6 @@ initEditor()
         <AlignLeft :size="17" />
       </button>
 
-
       <!-- ALIGN CENTER -->
 
       <button
@@ -233,7 +213,6 @@ initEditor()
       >
         <AlignCenter :size="17" />
       </button>
-
 
       <!-- ALIGN RIGHT -->
 
@@ -247,9 +226,7 @@ initEditor()
         <AlignRight :size="17" />
       </button>
 
-
       <div class="mx-1 h-6 w-px bg-gray-300"></div>
-
 
       <!-- TEXT COLOR -->
 
@@ -257,11 +234,7 @@ initEditor()
         title="Warna text"
         class="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 text-sm text-gray-600 transition hover:bg-orange-100"
       >
-        <span
-          class="text-xs font-medium"
-        >
-          A
-        </span>
+        <span class="text-xs font-medium"> A </span>
 
         <input
           v-model="textColor"
@@ -270,7 +243,6 @@ initEditor()
           @change="changeTextColor"
         />
       </label>
-
 
       <!-- IMAGE -->
 
@@ -292,9 +264,7 @@ initEditor()
         @change="handleImageUpload"
       />
 
-
       <div class="mx-1 h-6 w-px bg-gray-300"></div>
-
 
       <!-- UNDO -->
 
@@ -308,7 +278,6 @@ initEditor()
         <Undo2 :size="17" />
       </button>
 
-
       <!-- REDO -->
 
       <button
@@ -320,9 +289,7 @@ initEditor()
       >
         <Redo2 :size="17" />
       </button>
-
     </div>
-
 
     <!-- ========================= -->
     <!-- EDITOR -->
@@ -335,7 +302,6 @@ initEditor()
       data-placeholder="Tulis konten berita..."
       @input="updateContent"
     ></div>
-
   </div>
 </template>
 

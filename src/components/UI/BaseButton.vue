@@ -2,39 +2,39 @@
 import { computed } from 'vue'
 
 defineOptions({
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
 const props = defineProps({
   as: {
     type: [String, Object],
-    default: 'button'
+    default: 'button',
   },
 
   variant: {
     type: String,
-    default: 'primary'
+    default: 'primary',
   },
 
   size: {
     type: String,
-    default: 'md'
+    default: 'md',
   },
 
   type: {
     type: String,
-    default: 'button'
+    default: 'button',
   },
 
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
 
   fullWidth: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const variantClass = computed(() => {
@@ -68,12 +68,13 @@ const sizeClass = computed(() => {
   <component
     :is="as"
     :type="as === 'button' ? type : undefined"
-    :disabled="disabled" v-bind="$attrs"
+    :disabled="disabled"
+    v-bind="$attrs"
     :class="[
       'inline-flex items-center justify-center gap-2 rounded-full font-semibold shadow-xl transition duration-300 hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-50',
       variantClass,
       sizeClass,
-      fullWidth && 'w-full'
+      fullWidth && 'w-full',
     ]"
   >
     <slot />

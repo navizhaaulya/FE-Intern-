@@ -39,8 +39,7 @@ const getFeedbacks = async () => {
     list.value = response?.data || []
   } catch (err) {
     console.error('Gagal mengambil kritik & saran:', err)
-    error.value =
-      err.response?.data?.message || err.message || 'Gagal mengambil data'
+    error.value = err.response?.data?.message || err.message || 'Gagal mengambil data'
   } finally {
     loading.value = false
   }
@@ -176,7 +175,10 @@ onMounted(() => {
             </div>
           </div>
 
-          <div v-if="error" class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
+          <div
+            v-if="error"
+            class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600"
+          >
             {{ error }}
             <button @click="getFeedbacks" class="ml-3 font-semibold underline">Coba lagi</button>
           </div>
@@ -197,7 +199,10 @@ onMounted(() => {
         </section>
 
         <!-- MODAL DETAIL -->
-        <div v-if="showDetail" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div
+          v-if="showDetail"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+        >
           <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-lg">
             <div class="mb-4 flex items-center justify-between">
               <h3 class="text-lg font-bold text-gray-800">Detail Kritik & Saran</h3>
@@ -216,14 +221,19 @@ onMounted(() => {
 
               <div>
                 <p class="text-xs font-medium text-gray-500">Tipe</p>
-                <span class="rounded-full px-3 py-1 text-xs font-semibold" :class="typeClass(detailData.type)">
+                <span
+                  class="rounded-full px-3 py-1 text-xs font-semibold"
+                  :class="typeClass(detailData.type)"
+                >
                   {{ typeLabel(detailData.type) }}
                 </span>
               </div>
 
               <div>
                 <p class="text-xs font-medium text-gray-500">Kategori</p>
-                <p class="text-sm text-gray-800">{{ detailData.rel_category || detailData.category_name || '-' }}</p>
+                <p class="text-sm text-gray-800">
+                  {{ detailData.rel_category || detailData.category_name || '-' }}
+                </p>
               </div>
 
               <div>

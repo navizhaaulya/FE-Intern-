@@ -1,12 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  ArrowLeft,
-  CalendarDays,
-  Vote,
-  ChevronRight,
-} from 'lucide-vue-next'
+import { ArrowLeft, CalendarDays, Vote, ChevronRight } from 'lucide-vue-next'
 
 import { publicApi } from '@/services/publicApi'
 import Navbar from '@/components/layout/Navbar.vue'
@@ -28,15 +23,11 @@ const loadVotings = async () => {
   try {
     const response = await publicApi.getVoting()
 
-    votings.value = Array.isArray(response)
-      ? response
-      : response?.data || []
+    votings.value = Array.isArray(response) ? response : response?.data || []
   } catch (error) {
     console.error(error)
 
-    errorMessage.value =
-      error.response?.data?.message ||
-      'Gagal mengambil data voting.'
+    errorMessage.value = error.response?.data?.message || 'Gagal mengambil data voting.'
   } finally {
     loading.value = false
   }
@@ -59,10 +50,7 @@ const loadMajors = async () => {
 }
 
 const highlightedVoting = computed(() => {
-  return (
-    votings.value.find((item) => item.is_highlight === true) ||
-    votings.value[0]
-  )
+  return votings.value.find((item) => item.is_highlight === true) || votings.value[0]
 })
 
 const otherVotings = computed(() => {
@@ -70,16 +58,14 @@ const otherVotings = computed(() => {
     return votings.value
   }
 
-  return votings.value.filter(
-    (item) => item.id !== highlightedVoting.value.id
-  )
+  return votings.value.filter((item) => item.id !== highlightedVoting.value.id)
 })
 
 const openVoting = (voting) => {
   if (!voting?.slug) return
 
-  router.push(`/voting/${voting.slug}`)
-} 
+  router.push(`/votings/${voting.slug}`)
+}
 const formatDate = (date) => {
   if (!date) return '-'
 
@@ -101,21 +87,10 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-[#FDF8F2]">
-
-    <!-- ========================= -->
-    <!-- NAVBAR -->
-    <!-- ========================= -->
-
     <Navbar />
 
-    <!-- ========================= -->
-    <!-- MAIN CONTENT -->
-    <!-- ========================= -->
-
     <main class="px-5 py-8 sm:px-8 lg:px-12">
-
       <div class="mx-auto max-w-[1080px]">
-
         <!-- Kembali -->
         <button
           type="button"
@@ -128,30 +103,17 @@ onMounted(() => {
 
         <!-- Page Title -->
         <div class="mb-10 text-center">
+          <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">Voting</h1>
 
-          <h1
-            class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
-          >
-            Voting
-          </h1>
-
-          <p
-            class="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500"
-          >
-            Ikuti berbagai pemilihan yang sedang berlangsung dan
-            berikan suara untuk pilihan favoritmu.
+          <p class="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            Ikuti berbagai pemilihan yang sedang berlangsung dan berikan suara untuk pilihan
+            favoritmu.
           </p>
-
         </div>
 
         <!-- Loading -->
-        <div
-          v-if="loading"
-          class="flex min-h-[400px] items-center justify-center"
-        >
-          <div class="text-sm font-medium text-slate-500">
-            Memuat data voting...
-          </div>
+        <div v-if="loading" class="flex min-h-[400px] items-center justify-center">
+          <div class="text-sm font-medium text-slate-500">Memuat data voting...</div>
         </div>
 
         <!-- Error -->
@@ -164,23 +126,15 @@ onMounted(() => {
 
         <!-- Content -->
         <template v-else>
-
           <!-- ========================= -->
           <!-- HIGHLIGHT VOTING -->
           <!-- ========================= -->
 
           <section v-if="highlightedVoting">
-
             <div class="mb-5">
+              <h2 class="text-xl font-bold text-slate-900">Voting Pilihan</h2>
 
-              <h2 class="text-xl font-bold text-slate-900">
-                Voting Pilihan
-              </h2>
-
-              <p class="mt-1 text-sm text-slate-500">
-                Voting yang sedang menjadi pilihan utama.
-              </p>
-
+              <p class="mt-1 text-sm text-slate-500">Voting yang sedang menjadi pilihan utama.</p>
             </div>
 
             <!-- Highlight Banner -->
@@ -188,7 +142,6 @@ onMounted(() => {
             <div
               class="group relative min-h-[360px] overflow-hidden rounded-[28px] bg-slate-900 shadow-[0_12px_35px_rgba(15,23,42,0.12)]"
             >
-
               <!-- Background Image -->
               <img
                 v-if="highlightedVoting.img_cover"
@@ -198,10 +151,7 @@ onMounted(() => {
               />
 
               <!-- Fallback -->
-              <div
-                v-else
-                class="absolute inset-0 bg-slate-800"
-              ></div>
+              <div v-else class="absolute inset-0 bg-slate-800"></div>
 
               <!-- Overlay -->
               <div
@@ -212,7 +162,6 @@ onMounted(() => {
               <div
                 class="relative z-10 flex min-h-[360px] max-w-[700px] flex-col justify-center px-7 py-10 sm:px-10 lg:px-12"
               >
-
                 <!-- Label -->
                 <span
                   class="w-fit rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-md"
@@ -221,9 +170,7 @@ onMounted(() => {
                 </span>
 
                 <!-- Title -->
-                <h2
-                  class="mt-5 text-3xl font-extrabold leading-tight text-white sm:text-4xl"
-                >
+                <h2 class="mt-5 text-3xl font-extrabold leading-tight text-white sm:text-4xl">
                   {{ highlightedVoting.title }}
                 </h2>
 
@@ -237,7 +184,6 @@ onMounted(() => {
 
                 <!-- Date -->
                 <div class="mt-6 flex flex-wrap gap-3">
-
                   <div
                     v-if="highlightedVoting.start_date"
                     class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-xs font-medium text-white backdrop-blur-md"
@@ -257,7 +203,6 @@ onMounted(() => {
                     Berakhir
                     {{ formatDate(highlightedVoting.end_date) }}
                   </div>
-
                 </div>
 
                 <!-- Button -->
@@ -269,11 +214,8 @@ onMounted(() => {
                   Lihat Voting
                   <ChevronRight :size="18" />
                 </button>
-
               </div>
-
             </div>
-
           </section>
 
           <!-- ========================= -->
@@ -281,36 +223,21 @@ onMounted(() => {
           <!-- ========================= -->
 
           <section class="mt-14">
-
             <div class="mb-6">
+              <h2 class="text-xl font-bold text-slate-900">Daftar Voting</h2>
 
-              <h2 class="text-xl font-bold text-slate-900">
-                Daftar Voting
-              </h2>
-
-              <p class="mt-1 text-sm text-slate-500">
-                Pilih voting yang ingin kamu lihat.
-              </p>
-
+              <p class="mt-1 text-sm text-slate-500">Pilih voting yang ingin kamu lihat.</p>
             </div>
 
             <!-- Voting Cards -->
-            <div
-              v-if="otherVotings.length"
-              class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-            >
-
+            <div v-if="otherVotings.length" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <article
                 v-for="voting in otherVotings"
                 :key="voting.id"
                 class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.05)] transition duration-300 hover:-translate-y-1 hover:border-[#FFB77D] hover:shadow-[0_12px_30px_rgba(255,148,67,0.12)]"
               >
-
                 <!-- Image -->
-                <div
-                  class="relative h-48 overflow-hidden bg-[#FFF1E5]"
-                >
-
+                <div class="relative h-48 overflow-hidden bg-[#FFF1E5]">
                   <img
                     v-if="voting.img_cover"
                     :src="voting.img_cover"
@@ -318,37 +245,22 @@ onMounted(() => {
                     class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
 
-                  <div
-                    v-else
-                    class="flex h-full items-center justify-center bg-[#FFF1E5]"
-                  >
-                    <Vote
-                      :size="48"
-                      stroke-width="1.5"
-                      class="text-[#FFB16F]"
-                    />
+                  <div v-else class="flex h-full items-center justify-center bg-[#FFF1E5]">
+                    <Vote :size="48" stroke-width="1.5" class="text-[#FFB16F]" />
                   </div>
 
                   <!-- Image Overlay -->
-                  <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"
-                  ></div>
-
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 </div>
 
                 <!-- Content -->
                 <div class="p-5">
-
                   <!-- Orange Accent -->
-                  <p
-                    class="text-[11px] font-semibold uppercase tracking-wider text-[#FF9343]"
-                  >
+                  <p class="text-[11px] font-semibold uppercase tracking-wider text-[#FF9343]">
                     Pemilihan
                   </p>
 
-                  <h3
-                    class="mt-2 line-clamp-2 text-lg font-bold leading-6 text-slate-900"
-                  >
+                  <h3 class="mt-2 line-clamp-2 text-lg font-bold leading-6 text-slate-900">
                     {{ voting.title }}
                   </h3>
 
@@ -360,13 +272,8 @@ onMounted(() => {
                   </p>
 
                   <!-- Date -->
-                  <div
-                    class="mt-4 flex items-center gap-2 text-xs text-slate-500"
-                  >
-                    <CalendarDays
-                      :size="14"
-                      class="text-[#FF9343]"
-                    />
+                  <div class="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                    <CalendarDays :size="14" class="text-[#FF9343]" />
 
                     <span>
                       {{ formatDate(voting.start_date) }}
@@ -384,11 +291,8 @@ onMounted(() => {
                     Lihat Detail
                     <ChevronRight :size="17" />
                   </button>
-
                 </div>
-
               </article>
-
             </div>
 
             <!-- Empty -->
@@ -396,33 +300,15 @@ onMounted(() => {
               v-else
               class="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center"
             >
+              <Vote :size="42" class="mx-auto text-[#FFB16F]" />
 
-              <Vote
-                :size="42"
-                class="mx-auto text-[#FFB16F]"
-              />
-
-              <p
-                class="mt-4 text-sm font-medium text-slate-500"
-              >
-                Belum ada voting lainnya.
-              </p>
-
+              <p class="mt-4 text-sm font-medium text-slate-500">Belum ada voting lainnya.</p>
             </div>
-
           </section>
-
         </template>
-
       </div>
-
     </main>
 
-    <Footer
-      v-if="footer"
-      :footer="footer"
-      :majors="majors"
-    />
-
+    <Footer v-if="footer" :footer="footer" :majors="majors" />
   </div>
 </template>

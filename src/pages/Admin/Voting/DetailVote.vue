@@ -32,7 +32,11 @@ const getVoting = async () => {
 
 const formatDate = (date) => {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+  return new Date(date).toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 
 // ============ KANDIDAT (OPSI VOTING) ============
@@ -51,10 +55,17 @@ const getCandidates = async () => {
   }
 }
 
+// ⬅️ FIX: kalau field_value adalah URL eksternal, file aslinya gak pernah tersimpan
+// di server (bukan hasil upload asli) -> pakai field_value langsung, jangan lewat /api/file
 const getImageUrl = (imgObj) => {
   if (!imgObj) return ''
   if (typeof imgObj === 'string') return imgObj
-  const rawUrl = imgObj.url || imgObj.field_value || ''
+
+  if (imgObj.field_value?.startsWith('http')) {
+    return imgObj.field_value
+  }
+
+  const rawUrl = imgObj.url || ''
   if (!rawUrl) return ''
   if (rawUrl.startsWith('http')) return rawUrl
   return `${import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')}/${rawUrl}`
@@ -91,7 +102,8 @@ const openAddCandidate = () => {
 const openEditCandidate = (item) => {
   candidateForm.value = {
     id: item.id,
-    img_cover: (typeof item.img_cover === 'object' ? item.img_cover.field_value : item.img_cover) || '',
+    img_cover:
+      (typeof item.img_cover === 'object' ? item.img_cover.field_value : item.img_cover) || '',
     title: item.title,
     description: item.description,
     order: item.order,
@@ -110,6 +122,12 @@ const saveCandidate = async () => {
     return
   }
 
+  // ⬅️ FIX: description sekarang wajib diisi
+  if (!candidateForm.value.description.trim()) {
+    Swal.fire({ icon: 'warning', title: 'Keterangan wajib diisi' })
+    return
+  }
+
   try {
     savingCandidate.value = true
 
@@ -123,9 +141,9 @@ const saveCandidate = async () => {
     }
 
     if (candidateForm.value.id) {
-      await api.update('voting_candidate', candidateForm.value.id, payload)
+      await api.update('voting_candidates', candidateForm.value.id, payload)
     } else {
-      await api.create('voting_candidate', payload)
+      await api.create('voting_candidates', payload)
     }
 
     await getCandidates()
@@ -168,11 +186,23 @@ const deleteCandidate = async (id) => {
   if (!result.isConfirmed) return
 
   try {
-    await api.delete('voting_candidate', id)
+    await api.delete('voting_candidates', id)
     await getCandidates()
-    Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Kandidat berhasil dihapus.', timer: 1500, showConfirmButton: false, timerProgressBar: true })
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Kandidat berhasil dihapus.',
+      timer: 1500,
+      showConfirmButton: false,
+      timerProgressBar: true,
+    })
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'Gagal!', text: err.response?.data?.message || 'Gagal menghapus kandidat.', confirmButtonColor: '#f97316' })
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: err.response?.data?.message || 'Gagal menghapus kandidat.',
+      confirmButtonColor: '#f97316',
+    })
   }
 }
 
@@ -218,25 +248,48 @@ onMounted(async () => {
 
       <main class="min-w-0 flex-1 px-6 py-8 lg:px-10">
         <div class="mb-4 flex items-center gap-3 rounded-2xl bg-white px-6 py-4 shadow-sm">
-          <button @click="router.push('/admin/votings')" class="flex items-center gap-2 text-gray-700 transition hover:text-orange-500">
+          <button
+            @click="router.push('/admin/votings')"
+            class="flex items-center gap-2 text-gray-700 transition hover:text-orange-500"
+          >
             ⏮ Kembali
           </button>
         </div>
 
-        <div v-if="loading" class="rounded-xl bg-white p-10 text-center text-gray-500 shadow-sm">Memuat data...</div>
+        <div v-if="loading" class="rounded-xl bg-white p-10 text-center text-gray-500 shadow-sm">
+          Memuat data...
+        </div>
 
         <template v-else>
           <!-- DETAIL VOTING -->
           <section class="mb-4 rounded-xl bg-white p-6 shadow-sm">
             <div class="space-y-3 text-sm">
-              <div class="flex"><span class="w-40 shrink-0 text-gray-500">Judul Voting</span><span class="text-gray-800">: {{ voting?.title }}</span></div>
-              <div class="flex"><span class="w-40 shrink-0 text-gray-500">Deskripsi</span><span class="text-gray-800">: {{ voting?.description }}</span></div>
-              <div class="flex"><span class="w-40 shrink-0 text-gray-500">Cover Voting</span><span class="text-gray-800">: {{ getImageUrl(voting?.img_cover) || '-' }}</span></div>
-              <div class="flex"><span class="w-40 shrink-0 text-gray-500">Tanggal Mulai</span><span class="text-gray-800">: {{ formatDate(voting?.start_date) }}</span></div>
-              <div class="flex"><span class="w-40 shrink-0 text-gray-500">Tanggal Selesai</span><span class="text-gray-800">: {{ formatDate(voting?.end_date) }}</span></div>
+              <div class="flex">
+                <span class="w-40 shrink-0 text-gray-500">Judul Voting</span
+                ><span class="text-gray-800">: {{ voting?.title }}</span>
+              </div>
+              <div class="flex">
+                <span class="w-40 shrink-0 text-gray-500">Deskripsi</span
+                ><span class="text-gray-800">: {{ voting?.description }}</span>
+              </div>
+              <div class="flex">
+                <span class="w-40 shrink-0 text-gray-500">Cover Voting</span
+                ><span class="text-gray-800">: {{ getImageUrl(voting?.img_cover) || '-' }}</span>
+              </div>
+              <div class="flex">
+                <span class="w-40 shrink-0 text-gray-500">Tanggal Mulai</span
+                ><span class="text-gray-800">: {{ formatDate(voting?.start_date) }}</span>
+              </div>
+              <div class="flex">
+                <span class="w-40 shrink-0 text-gray-500">Tanggal Selesai</span
+                ><span class="text-gray-800">: {{ formatDate(voting?.end_date) }}</span>
+              </div>
               <div class="flex">
                 <span class="w-40 shrink-0 text-gray-500">Status</span>
-                <span class="font-semibold" :class="voting?.status_code ? 'text-green-600' : 'text-red-500'">
+                <span
+                  class="font-semibold"
+                  :class="voting?.status_code ? 'text-green-600' : 'text-red-500'"
+                >
                   : {{ voting?.status_code ? 'Aktif' : 'Non Aktif' }}
                 </span>
               </div>
@@ -245,8 +298,18 @@ onMounted(async () => {
 
           <!-- TABS -->
           <div class="mb-2 flex gap-6 px-2 text-sm font-semibold">
-            <button @click="switchTab('opsi')" :class="activeTab === 'opsi' ? 'text-gray-900' : 'text-gray-400'">Opsi Voting</button>
-            <button @click="switchTab('voters')" :class="activeTab === 'voters' ? 'text-gray-900' : 'text-gray-400'">Voting User</button>
+            <button
+              @click="switchTab('opsi')"
+              :class="activeTab === 'opsi' ? 'text-gray-900' : 'text-gray-400'"
+            >
+              Opsi Voting
+            </button>
+            <button
+              @click="switchTab('voters')"
+              :class="activeTab === 'voters' ? 'text-gray-900' : 'text-gray-400'"
+            >
+              Voting User
+            </button>
           </div>
 
           <!-- TAB: OPSI VOTING -->
@@ -254,7 +317,10 @@ onMounted(async () => {
             <!-- LIST VIEW -->
             <template v-if="view === 'list'">
               <div class="mb-4 flex items-center justify-end">
-                <button @click="openAddCandidate" class="flex items-center gap-2 rounded-xl bg-orange-400 px-5 py-3 font-semibold text-white transition hover:bg-orange-500">
+                <button
+                  @click="openAddCandidate"
+                  class="flex items-center gap-2 rounded-xl bg-orange-400 px-5 py-3 font-semibold text-white transition hover:bg-orange-500"
+                >
                   <Plus :size="18" /> Tambah Baru
                 </button>
               </div>
@@ -273,31 +339,64 @@ onMounted(async () => {
                   </thead>
                   <tbody>
                     <tr v-if="candidatesLoading">
-                      <td colspan="6" class="px-3 py-10 text-center text-gray-500">Memuat data...</td>
+                      <td colspan="6" class="px-3 py-10 text-center text-gray-500">
+                        Memuat data...
+                      </td>
                     </tr>
                     <tr v-else-if="candidates.length === 0">
-                      <td colspan="6" class="px-3 py-10 text-center text-gray-400">Belum ada kandidat.</td>
+                      <td colspan="6" class="px-3 py-10 text-center text-gray-400">
+                        Belum ada kandidat.
+                      </td>
                     </tr>
-                    <tr v-for="(item, index) in candidates" v-else :key="item.id" class="border-b border-gray-100 text-sm text-gray-700">
+                    <tr
+                      v-for="(item, index) in candidates"
+                      v-else
+                      :key="item.id"
+                      class="border-b border-gray-100 text-sm text-gray-700"
+                    >
                       <td class="px-3 py-4">{{ index + 1 }}.</td>
                       <td class="px-3 py-4">
                         <div class="flex items-center gap-2">
-                          <button @click="openEditCandidate(item)" class="rounded-lg p-1.5 text-orange-500 hover:bg-orange-50" title="Edit">
+                          <button
+                            @click="openEditCandidate(item)"
+                            class="rounded-lg p-1.5 text-orange-500 hover:bg-orange-50"
+                            title="Edit"
+                          >
                             <Pencil :size="16" />
                           </button>
-                          <button @click="deleteCandidate(item.id)" class="rounded-lg p-1.5 text-red-500 hover:bg-red-50" title="Hapus">
+                          <button
+                            @click="deleteCandidate(item.id)"
+                            class="rounded-lg p-1.5 text-red-500 hover:bg-red-50"
+                            title="Hapus"
+                          >
                             <Trash2 :size="16" />
                           </button>
                         </div>
                       </td>
                       <td class="px-3 py-4">
-                        <img v-if="getImageUrl(item.img_cover)" :src="getImageUrl(item.img_cover)" class="h-10 w-16 rounded-lg object-cover" />
-                        <div v-else class="flex h-10 w-16 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400">No Image</div>
+                        <img
+                          v-if="getImageUrl(item.img_cover)"
+                          :src="getImageUrl(item.img_cover)"
+                          class="h-10 w-16 rounded-lg object-cover"
+                        />
+                        <div
+                          v-else
+                          class="flex h-10 w-16 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400"
+                        >
+                          No Image
+                        </div>
                       </td>
                       <td class="px-3 py-4 max-w-xs">{{ item.title }}</td>
                       <td class="px-3 py-4">{{ item.order ?? '-' }}</td>
                       <td class="px-3 py-4">
-                        <span class="rounded-full px-3 py-1 text-xs font-semibold" :class="item.status_code ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'">
+                        <span
+                          class="rounded-full px-3 py-1 text-xs font-semibold"
+                          :class="
+                            item.status_code
+                              ? 'bg-green-100 text-green-600'
+                              : 'bg-red-100 text-red-500'
+                          "
+                        >
                           {{ item.status_code ? 'Aktif' : 'Non Aktif' }}
                         </span>
                       </td>
@@ -321,17 +420,32 @@ onMounted(async () => {
 
                 <div>
                   <label class="mb-1 block text-sm font-medium text-gray-600">Judul</label>
-                  <input v-model="candidateForm.title" type="text" placeholder="Masukan Judul..." class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100" />
+                  <input
+                    v-model="candidateForm.title"
+                    type="text"
+                    placeholder="Masukan Judul..."
+                    class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                  />
                 </div>
 
                 <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-600">Keterangan (opsional)</label>
-                  <input v-model="candidateForm.description" type="text" placeholder="Masukan keterangan..." class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100" />
+                  <label class="mb-1 block text-sm font-medium text-gray-600">Keterangan</label>
+                  <input
+                    v-model="candidateForm.description"
+                    type="text"
+                    placeholder="Masukan keterangan..."
+                    class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                  />
                 </div>
 
                 <div>
                   <label class="mb-1 block text-sm font-medium text-gray-600">Urutan</label>
-                  <input v-model.number="candidateForm.order" type="number" placeholder="Urutan kandidat..." class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100" />
+                  <input
+                    v-model.number="candidateForm.order"
+                    type="number"
+                    placeholder="Urutan kandidat..."
+                    class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                  />
                 </div>
 
                 <div>
@@ -341,16 +455,24 @@ onMounted(async () => {
                       <input v-model="candidateForm.status_code" :value="true" type="radio" /> Aktif
                     </label>
                     <label class="flex items-center gap-2 text-sm text-gray-700">
-                      <input v-model="candidateForm.status_code" :value="false" type="radio" /> Non-aktif
+                      <input v-model="candidateForm.status_code" :value="false" type="radio" />
+                      Non-aktif
                     </label>
                   </div>
                 </div>
 
                 <div class="flex gap-3">
-                  <button @click="saveCandidate" :disabled="savingCandidate" class="rounded-xl bg-orange-400 px-6 py-3 font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50">
+                  <button
+                    @click="saveCandidate"
+                    :disabled="savingCandidate"
+                    class="rounded-xl bg-orange-400 px-6 py-3 font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50"
+                  >
                     {{ savingCandidate ? 'Menyimpan...' : 'Simpan' }}
                   </button>
-                  <button @click="cancelCandidateForm" class="rounded-xl border border-gray-200 px-6 py-3 font-semibold text-gray-600 hover:bg-gray-50">
+                  <button
+                    @click="cancelCandidateForm"
+                    class="rounded-xl border border-gray-200 px-6 py-3 font-semibold text-gray-600 hover:bg-gray-50"
+                  >
                     Batal
                   </button>
                 </div>
@@ -375,9 +497,16 @@ onMounted(async () => {
                     <td colspan="4" class="px-3 py-10 text-center text-gray-500">Memuat data...</td>
                   </tr>
                   <tr v-else-if="voters.length === 0">
-                    <td colspan="4" class="px-3 py-10 text-center text-gray-400">Belum ada yang vote.</td>
+                    <td colspan="4" class="px-3 py-10 text-center text-gray-400">
+                      Belum ada yang vote.
+                    </td>
                   </tr>
-                  <tr v-for="(v, index) in voters" v-else :key="v.id" class="border-b border-gray-100 text-sm text-gray-700">
+                  <tr
+                    v-for="(v, index) in voters"
+                    v-else
+                    :key="v.id"
+                    class="border-b border-gray-100 text-sm text-gray-700"
+                  >
                     <td class="px-3 py-4">{{ index + 1 }}.</td>
                     <td class="px-3 py-4">{{ v.user_name || '-' }}</td>
                     <td class="px-3 py-4">{{ v.candidate_title || '-' }}</td>

@@ -2,8 +2,8 @@
 defineProps({
   hover: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 </script>
 
@@ -11,7 +11,7 @@ defineProps({
   <div
     :class="[
       'rounded-3xl shadow-lg overflow-hidden',
-      hover && 'transition duration-300 hover:-translate-y-2 hover:shadow-xl'
+      hover && 'transition duration-300 hover:-translate-y-2 hover:shadow-xl',
     ]"
   >
     <slot />

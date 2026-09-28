@@ -5,8 +5,8 @@ import BaseContainer from '@/components/UI/BaseContainer.vue'
 const props = defineProps({
   about: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 const embedUrl = computed(() => {
@@ -30,24 +30,23 @@ const embedUrl = computed(() => {
 </script>
 
 <template>
-  <section
-    id="video-profile"
-    class="bg-white py-28"
-  >
+  <section id="video-profile" class="bg-white py-28">
     <BaseContainer>
-
       <div class="mx-auto mt-14 max-w-5xl">
-
-        <div
-          class="overflow-hidden rounded-2xl shadow-xl"
-        >
-
+        <div class="overflow-hidden rounded-2xl shadow-xl">
           <iframe
             v-if="embedUrl"
             :src="embedUrl"
             class="aspect-video w-full"
             title="Video Profil"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="
+              accelerometer;
+              autoplay;
+              clipboard-write;
+              encrypted-media;
+              gyroscope;
+              picture-in-picture;
+            "
             allowfullscreen
           />
 
@@ -57,11 +56,8 @@ const embedUrl = computed(() => {
           >
             Video profil belum tersedia.
           </div>
-
         </div>
-
       </div>
-
     </BaseContainer>
   </section>
 </template>

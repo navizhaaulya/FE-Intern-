@@ -41,7 +41,15 @@ const getVotings = async () => {
     error.value = null
 
     const response = await http.get('/admin/votings')
-    list.value = response.data?.data || []
+    const data = response.data?.data || []
+
+    // Transform img_cover jadi full URL biar bisa ditampilin DataTable
+    list.value = data.map((item) => ({
+      ...item,
+      img_cover: item.img_cover
+        ? `http://localhost:8000/api/file/voting/img_cover/${item.id}/${Date.now()}`
+        : null,
+    }))
   } catch (err) {
     console.error('Gagal mengambil voting:', err)
     error.value = err.response?.data?.message || err.message || 'Gagal mengambil data voting'
@@ -90,9 +98,21 @@ const deleteVoting = async (id) => {
   try {
     await http.delete(`/admin/votings/${id}`)
     await getVotings()
-    Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Voting berhasil dihapus.', timer: 1500, showConfirmButton: false, timerProgressBar: true })
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Voting berhasil dihapus.',
+      timer: 1500,
+      showConfirmButton: false,
+      timerProgressBar: true,
+    })
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'Gagal!', text: err.response?.data?.message || 'Gagal menghapus voting.', confirmButtonColor: '#f97316' })
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: err.response?.data?.message || 'Gagal menghapus voting.',
+      confirmButtonColor: '#f97316',
+    })
   }
 }
 
@@ -100,9 +120,21 @@ const toggleHighlight = async (id) => {
   try {
     await http.put('/votings/highlight', { id })
     await getVotings()
-    Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Voting dijadikan highlight.', timer: 1500, showConfirmButton: false, timerProgressBar: true })
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: 'Voting dijadikan highlight.',
+      timer: 1500,
+      showConfirmButton: false,
+      timerProgressBar: true,
+    })
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'Gagal!', text: err.response?.data?.message || 'Gagal mengubah highlight.', confirmButtonColor: '#f97316' })
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal!',
+      text: err.response?.data?.message || 'Gagal mengubah highlight.',
+      confirmButtonColor: '#f97316',
+    })
   }
 }
 
@@ -118,7 +150,9 @@ onMounted(() => {
       <AdminSidebar />
       <main class="min-w-0 flex-1 px-6 py-8 lg:px-10">
         <div class="mb-4 flex items-center gap-3 rounded-2xl bg-white px-6 py-4 shadow-sm">
-          <button @click="router.back()" class="text-gray-700 transition hover:text-orange-500">‹</button>
+          <button @click="router.back()" class="text-gray-700 transition hover:text-orange-500">
+            ‹
+          </button>
           <h1 class="font-semibold text-gray-800">Kelola Voting</h1>
         </div>
 
@@ -126,15 +160,27 @@ onMounted(() => {
           <div class="mb-6 flex items-center justify-between">
             <div class="relative max-w-sm flex-1">
               <Search :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input v-model="search" @input="currentPage = 1" type="text" placeholder="Cari Voting Disini.." class="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100" />
+              <input
+                v-model="search"
+                @input="currentPage = 1"
+                type="text"
+                placeholder="Cari Voting Disini.."
+                class="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+              />
             </div>
 
-            <button @click="goToCreate" class="flex items-center gap-2 rounded-xl bg-orange-400 px-5 py-3 font-semibold text-white transition hover:bg-orange-500">
+            <button
+              @click="goToCreate"
+              class="flex items-center gap-2 rounded-xl bg-orange-400 px-5 py-3 font-semibold text-white transition hover:bg-orange-500"
+            >
               <Plus :size="18" /> Tambah
             </button>
           </div>
 
-          <div v-if="error" class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
+          <div
+            v-if="error"
+            class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600"
+          >
             {{ error }}
             <button @click="getVotings" class="ml-3 font-semibold underline">Coba lagi</button>
           </div>

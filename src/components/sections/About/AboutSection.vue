@@ -5,8 +5,8 @@ import BaseContainer from '@/components/UI/BaseContainer.vue'
 const props = defineProps({
   about: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 // sama pola dengan DataTable.vue: handle path relatif dari BE
@@ -31,7 +31,7 @@ const getImageUrl = (imgObj) => {
               :src="getImageUrl(about.img_profile_1)"
               alt="Profil Sekolah"
               class="h-80 w-full object-cover"
-            >
+            />
           </div>
 
           <div class="overflow-hidden rounded-2xl shadow-lg">
@@ -40,13 +40,16 @@ const getImageUrl = (imgObj) => {
               :src="getImageUrl(about.img_profile_2)"
               alt="Kegiatan Sekolah"
               class="h-80 w-full object-cover"
-            >
+            />
           </div>
         </div>
 
         <div class="max-w-xl">
           <SectionTitle :badge="about?.motto" :title="about?.profile_title" />
-          <div v-html="about?.profile_description" class="whitespace-pre-line text-justify leading-8 text-slate-600"></div>
+          <div
+            v-html="about?.profile_description"
+            class="whitespace-pre-line text-justify leading-8 text-slate-600"
+          ></div>
         </div>
       </div>
     </BaseContainer>

@@ -34,8 +34,7 @@ const getConfig = async () => {
     }
   } catch (err) {
     console.error('Gagal mengambil global config:', err)
-    error.value =
-      err.response?.data?.message || err.message || 'Gagal mengambil data config'
+    error.value = err.response?.data?.message || err.message || 'Gagal mengambil data config'
   } finally {
     loading.value = false
   }
@@ -165,7 +164,10 @@ onMounted(() => {
                 controls
                 class="h-full w-full object-cover"
               />
-              <div v-else class="flex h-full w-full items-center justify-center text-sm text-gray-400">
+              <div
+                v-else
+                class="flex h-full w-full items-center justify-center text-sm text-gray-400"
+              >
                 Belum ada video
               </div>
             </div>

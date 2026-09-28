@@ -55,18 +55,12 @@ const statusClass = computed(() => {
     archive: 'bg-gray-100 text-gray-600',
   }
 
-  return (
-    classes[normalizedStatus.value] ||
-    'bg-gray-100 text-gray-600'
-  )
+  return classes[normalizedStatus.value] || 'bg-gray-100 text-gray-600'
 })
 </script>
 
 <template>
-  <span
-    :class="statusClass"
-    class="inline-flex rounded-full px-4 py-1.5 text-xs font-semibold"
-  >
+  <span :class="statusClass" class="inline-flex rounded-full px-4 py-1.5 text-xs font-semibold">
     {{ label }}
   </span>
 </template>
