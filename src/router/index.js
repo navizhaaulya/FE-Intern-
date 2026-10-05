@@ -42,6 +42,12 @@ const router = createRouter({
     },
 
     {
+      path: '/majors/:slug',
+      name: 'major-detail',
+      component: () => import('@/pages/Major/MajorDetail.vue'),
+    },
+
+    {
       path: '/feedback',
       name: 'feedback',
       component: FeedbackPage,
@@ -225,6 +231,31 @@ const router = createRouter({
         role: 'admin',
       },
     },
+
+    {
+      path: '/admin/major',
+      name: 'admin-major',
+      component: () => import('@/pages/Admin/Major/MajorList.vue'),
+      meta: { requiresAuth: true, role: 'admin' },
+    },
+    {
+      path: '/admin/major/create',
+      name: 'admin-major-create',
+      component: () => import('@/pages/Admin/Major/MajorForm.vue'),
+      meta: { requiresAuth: true, role: 'admin' },
+    },
+    {
+      path: '/admin/major/:id',
+      name: 'admin-major-detail',
+      component: () => import('@/pages/Admin/Major/MajorDetailAdmin.vue'),
+      meta: { requiresAuth: true, role: 'admin' },
+    },
+    {
+      path: '/admin/major/:id/edit',
+      name: 'admin-major-edit',
+      component: () => import('@/pages/Admin/Major/MajorForm.vue'),
+      meta: { requiresAuth: true, role: 'admin' },
+    },
     {
       path: '/admin/voting',
       name: 'admin-voting',
@@ -279,6 +310,13 @@ const router = createRouter({
         requiresAuth: true,
         role: 'admin',
       },
+    },
+
+    {
+      path: '/admin/master-data',
+      name: 'admin-master-data',
+      component: () => import('@/pages/Admin/MasterData/CategoryFb.vue'),
+      meta: { requiresAuth: true, role: 'admin' },
     },
   ],
 })

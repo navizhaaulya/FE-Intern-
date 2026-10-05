@@ -88,34 +88,9 @@ onUnmounted(stopSlide)
 
         <div class="mt-2 flex flex-wrap gap-5">
           <BaseButton as="a" :href="currentBanner?.url" target="_blank"> Selengkapnya </BaseButton>
-
-          <BaseButton variant="outline">
-            Kompetensi Keahlian
-
-            <ArrowUpRight :size="18" />
-          </BaseButton>
         </div>
       </div>
     </BaseContainer>
-    <!-- Previous -->
-
-    <button
-      @click="prevSlide"
-      class="absolute left-6 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/20 p-3 text-white backdrop-blur transition hover:bg-white/40"
-    >
-      <ChevronLeft />
-    </button>
-
-    <!-- Next -->
-
-    <button
-      @click="nextSlide"
-      class="absolute right-6 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/20 p-3 text-white backdrop-blur transition hover:bg-white/40"
-    >
-      <ChevronRight />
-    </button>
-
-    <!-- Indicator -->
 
     <div class="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-3">
       <button

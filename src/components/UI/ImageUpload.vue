@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { Upload, X, LoaderCircle } from 'lucide-vue-next'
+import { Upload, X } from 'lucide-vue-next'
 import { api } from '@/services/api'
 
 const props = defineProps({
@@ -8,12 +8,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
-
+  initialPreview: {
+    type: String,
+    default: '',
+  },
   accept: {
     type: String,
     default: 'image/jpeg,image/png,image/webp',
   },
-
   maxSize: {
     type: Number,
     default: 2,
@@ -23,7 +25,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'file-selected'])
 
 const fileInput = ref(null)
-const preview = ref('')
+const preview = ref(props.initialPreview || '')
 const error = ref('')
 const uploading = ref(false)
 
@@ -32,6 +34,16 @@ watch(
   (value) => {
     if (!value) {
       preview.value = ''
+    }
+  }
+)
+
+// Tangani kasus initialPreview baru datang belakangan (misal setelah fetch API selesai)
+watch(
+  () => props.initialPreview,
+  (value) => {
+    if (value && !preview.value) {
+      preview.value = value
     }
   },
   { immediate: true }
@@ -45,11 +57,9 @@ const openFilePicker = () => {
 
 const handleFile = async (event) => {
   const file = event.target.files?.[0]
-
   if (!file) return
 
   error.value = ''
-
   const maxBytes = props.maxSize * 1024 * 1024
 
   if (file.size > maxBytes) {
@@ -64,30 +74,21 @@ const handleFile = async (event) => {
     return
   }
 
-  // Preview lokal
   preview.value = URL.createObjectURL(file)
 
   try {
     uploading.value = true
-
     const response = await api.upload(file)
-
-    console.log('Response Upload:', response)
 
     if (!response?.success) {
       throw new Error(response?.message || 'Gagal mengupload gambar.')
     }
 
-    // Simpan PATH hasil upload ke form
     emit('update:modelValue', response.path)
-
-    // Tetap kirim file kalau parent membutuhkannya
     emit('file-selected', file)
   } catch (err) {
     console.error('Error upload gambar:', err)
-
     error.value = err.response?.data?.message || err.message || 'Gagal mengupload gambar.'
-
     preview.value = ''
     emit('update:modelValue', '')
   } finally {
@@ -99,7 +100,6 @@ const handleFile = async (event) => {
 const removeImage = () => {
   preview.value = ''
   error.value = ''
-
   emit('update:modelValue', '')
 
   if (fileInput.value) {
@@ -110,17 +110,14 @@ const removeImage = () => {
 
 <template>
   <div>
-    <!-- UPLOAD BOX -->
     <div v-if="!preview" class="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-7">
       <div class="flex items-center justify-between gap-6">
         <div class="flex items-center gap-5">
           <div class="flex h-12 w-12 shrink-0 items-center justify-center text-gray-400">
             <Upload :size="38" />
           </div>
-
           <div>
             <p class="text-sm font-medium text-gray-600">Pilih file atau seret gambar di sini</p>
-
             <p class="mt-1 text-xs text-gray-500">JPG, PNG, WebP, maks. {{ maxSize }}MB</p>
           </div>
         </div>
@@ -136,11 +133,10 @@ const removeImage = () => {
       </div>
     </div>
 
-    <!-- PREVIEW -->
     <div v-else class="relative w-fit">
       <img
         :src="preview"
-        alt="Preview cover"
+        alt="Preview"
         class="h-44 w-72 rounded-xl border border-gray-200 object-cover"
       />
 
@@ -154,10 +150,7 @@ const removeImage = () => {
       </button>
     </div>
 
-    <!-- ERROR -->
-    <p v-if="error" class="mt-2 text-xs text-red-500">
-      {{ error }}
-    </p>
+    <p v-if="error" class="mt-2 text-xs text-red-500">{{ error }}</p>
 
     <input ref="fileInput" type="file" :accept="accept" class="hidden" @change="handleFile" />
   </div>
