@@ -30,6 +30,17 @@ const router = createRouter({
     },
 
     {
+      path: '/majors',
+      name: 'majors',
+      component: () => import('@/pages/Major/MajorPage.vue'),
+    },
+    {
+      path: '/feedback',
+      name: 'feedback',
+      component: () => import('@/pages/FeedbackPage.vue'),
+    },
+
+    {
       path: '/events',
       name: 'events',
       component: EventPage,

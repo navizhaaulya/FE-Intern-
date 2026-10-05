@@ -229,8 +229,8 @@ onBeforeUnmount(() => {
 
         <!-- Kompetensi Keahlian -->
         <div class="group relative">
-          <button
-            type="button"
+          <router-link
+            to="/majors"
             class="flex items-center gap-1 font-medium transition-colors duration-300"
             :class="
               isScrolled ? 'text-[#172B4D] hover:text-[#FF7A00]' : 'text-white hover:text-white/80'
@@ -242,8 +242,7 @@ onBeforeUnmount(() => {
               :size="17"
               class="transition-transform duration-200 group-hover:rotate-180"
             />
-          </button>
-
+          </router-link>
           <!-- Dropdown Jurusan -->
           <div
             class="invisible absolute left-1/2 top-full mt-4 w-[370px] -translate-x-1/2 translate-y-2 rounded-xl bg-white p-4 opacity-0 shadow-[0_10px_35px_rgba(15,23,42,0.15)] transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
