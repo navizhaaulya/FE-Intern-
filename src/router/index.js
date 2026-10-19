@@ -236,7 +236,7 @@ const router = createRouter({
     {
       path: '/admin/events/:id/edit',
       name: 'admin-event-edit',
-      component: () => import('@/pages/Admin/Eventadmin/AdminEditEvent.vue'),
+      component: () => import('@/pages/Admin/Eventadmin/AdminAddEvent.vue'),
       meta: {
         requiresAuth: true,
         role: 'admin',

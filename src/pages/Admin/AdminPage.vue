@@ -16,84 +16,165 @@ import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
 import AdminSidebar from '@/components/layout/AdminSidebar.vue'
 import { publicApi } from '@/services/publicApi'
+import { api } from '@/services/api'
+import http from '@/services/http'
 
 const router = useRouter()
-
-/*
-|--------------------------------------------------------------------------
-| DATA WEBSITE
-|--------------------------------------------------------------------------
-*/
 
 const footer = ref(null)
 const majors = ref([])
 
-const votings = ref([])
-const news = ref([])
+const totalUsers = ref(null) // null = belum diketahui/gagal, ditampilkan '-'
+const votingList = ref([]) // dari /admin/votings, lengkap semua status
+const newsList = ref([]) // dari api.list('news'), lengkap semua status
 const feedbacks = ref([])
+const feedbackCategories = ref([])
 
 const loading = ref(true)
+
+/*
+|--------------------------------------------------------------------------
+| LOAD DATA
+|--------------------------------------------------------------------------
+*/
 
 const loadDashboard = async () => {
   loading.value = true
 
-  try {
-    /*
-     * Ambil data yang memang sudah tersedia
-     */
+  const results = await Promise.allSettled([
+    publicApi.getFooter(),
+    publicApi.getMajors(),
+    http.get('/admin/votings'),
+    api.list('news'),
+    api.list('feedback_categories'),
+    http.get('/feedbacks'),
+    api.list('user'),
+  ])
 
-    const [footerResponse, majorsResponse, votingResponse, newsResponse, feedbackResponse] =
-      await Promise.all([
-        publicApi.getFooter(),
-        publicApi.getMajors(),
-        publicApi.getVoting(),
-        publicApi.getNews(),
-        publicApi.getFeedbacks(),
-      ])
+  const [
+    footerResult,
+    majorsResult,
+    votingResult,
+    newsResult,
+    categoriesResult,
+    feedbackResult,
+    userResult,
+  ] = results
 
-    footer.value = Array.isArray(footerResponse)
-      ? footerResponse
-      : footerResponse?.data || footerResponse
-
-    majors.value = Array.isArray(majorsResponse) ? majorsResponse : majorsResponse?.data || []
-
-    votings.value = Array.isArray(votingResponse) ? votingResponse : votingResponse?.data || []
-
-    news.value = Array.isArray(newsResponse) ? newsResponse : newsResponse?.data || []
-
-    feedbacks.value = Array.isArray(feedbackResponse)
-      ? feedbackResponse
-      : feedbackResponse?.data || []
-  } catch (error) {
-    console.error('Gagal mengambil data dashboard:', error)
-  } finally {
-    loading.value = false
+  // Footer & Majors (dipakai juga oleh Footer component)
+  if (footerResult.status === 'fulfilled') {
+    const res = footerResult.value
+    footer.value = Array.isArray(res) ? res : res?.data || res
   }
+
+  if (majorsResult.status === 'fulfilled') {
+    const res = majorsResult.value
+    majors.value = Array.isArray(res) ? res : res?.data || []
+  }
+
+  // Voting — ambil dari endpoint admin biar dapat semua status, bukan cuma yang aktif
+  if (votingResult.status === 'fulfilled') {
+    votingList.value = votingResult.value.data?.data || []
+  } else {
+    console.error('Gagal mengambil data voting:', votingResult.reason)
+  }
+
+  // Berita — ambil dari CRUD admin biar dapat semua status (draft/publish/archive)
+  if (newsResult.status === 'fulfilled') {
+    newsList.value = newsResult.value?.data || []
+  } else {
+    console.error('Gagal mengambil data berita:', newsResult.reason)
+  }
+
+  // Kategori Kritik & Saran
+  if (categoriesResult.status === 'fulfilled') {
+    feedbackCategories.value = categoriesResult.value?.data || []
+  } else {
+    console.error('Gagal mengambil kategori kritik & saran:', categoriesResult.reason)
+  }
+
+  // Daftar Kritik & Saran
+  if (feedbackResult.status === 'fulfilled') {
+    const res = feedbackResult.value
+    feedbacks.value = Array.isArray(res.data) ? res.data : res.data?.data || []
+  } else {
+    console.error('Gagal mengambil data kritik & saran:', feedbackResult.reason)
+  }
+
+  // Total Pengguna (opsional, tidak merusak dashboard kalau gagal)
+  if (userResult.status === 'fulfilled') {
+    totalUsers.value = (userResult.value?.data || []).length
+  } else {
+    console.error('Gagal mengambil total pengguna (cek nama model User):', userResult.reason)
+    totalUsers.value = null
+  }
+
+  loading.value = false
 }
 
 /*
 |--------------------------------------------------------------------------
-| STATISTIK
+| STATISTIK UTAMA
 |--------------------------------------------------------------------------
 */
 
-const totalVoting = computed(() => votings.value.length)
+const totalVotingActive = computed(() => votingList.value.filter((v) => v.status_code).length)
 
-const totalNews = computed(() => news.value.length)
+const totalNews = computed(() => newsList.value.length)
 
-const totalFeedback = computed(() => feedbacks.value.length)
+const isSaranType = (item) => item.type === true || item.type === 1 || item.type === '1'
+const isKritikType = (item) => item.type === false || item.type === 0 || item.type === '0'
 
-const totalSaran = computed(() => {
-  return feedbacks.value.filter(
-    (item) => item.type === true || item.type === 1 || item.type === '1'
-  ).length
+const totalSaran = computed(() => feedbacks.value.filter(isSaranType).length)
+const totalKritik = computed(() => feedbacks.value.filter(isKritikType).length)
+
+/*
+|--------------------------------------------------------------------------
+| STATISTIK KRITIK & SARAN PER KATEGORI (DINAMIS, BUKAN HARDCODE)
+|--------------------------------------------------------------------------
+*/
+
+const categoryChartData = computed(() => {
+  return feedbackCategories.value.map((cat) => {
+    const inCategory = feedbacks.value.filter((f) => String(f.category_id) === String(cat.id))
+    return {
+      id: cat.id,
+      name: cat.category_name,
+      kritik: inCategory.filter(isKritikType).length,
+      saran: inCategory.filter(isSaranType).length,
+    }
+  })
 })
 
-const totalKritik = computed(() => {
-  return feedbacks.value.filter(
-    (item) => item.type === false || item.type === 0 || item.type === '0'
-  ).length
+const maxKritik = computed(() => Math.max(1, ...categoryChartData.value.map((c) => c.kritik)))
+
+const maxSaran = computed(() => Math.max(1, ...categoryChartData.value.map((c) => c.saran)))
+
+const barHeight = (value, max) => {
+  if (value === 0) return '4%'
+  return `${Math.max(8, Math.round((value / max) * 100))}%`
+}
+
+/*
+|--------------------------------------------------------------------------
+| TABEL DAFTAR VOTING
+|--------------------------------------------------------------------------
+*/
+
+const recentVotings = computed(() => {
+  return [...votingList.value]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 5)
 })
+
+const formatDate = (date) => {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -104,12 +185,6 @@ const totalKritik = computed(() => {
 const goTo = (path) => {
   router.push(path)
 }
-
-/*
-|--------------------------------------------------------------------------
-| INIT
-|--------------------------------------------------------------------------
-*/
 
 onMounted(() => {
   loadDashboard()
@@ -158,7 +233,9 @@ onMounted(() => {
                 <div>
                   <p class="text-xs text-slate-500">Total Pengguna</p>
 
-                  <p class="mt-2 text-2xl font-bold text-slate-900">-</p>
+                  <p class="mt-2 text-2xl font-bold text-slate-900">
+                    {{ totalUsers ?? '-' }}
+                  </p>
                 </div>
 
                 <div class="rounded-xl bg-orange-50 p-3 text-[#FF7A00]">
@@ -167,15 +244,13 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- VOTING -->
-
             <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-xs text-slate-500">Voting Aktif</p>
 
                   <p class="mt-2 text-2xl font-bold text-slate-900">
-                    {{ totalVoting }}
+                    {{ totalVotingActive }}
                   </p>
                 </div>
 
@@ -220,8 +295,6 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-
-            <!-- KRITIK -->
 
             <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
               <div class="flex items-center justify-between">
@@ -293,7 +366,7 @@ onMounted(() => {
           </section>
 
           <!-- ================================================= -->
-          <!-- STATISTIK KRITIK & SARAN -->
+          <!-- STATISTIK KRITIK & SARAN (DINAMIS SESUAI DATA ASLI) -->
           <!-- ================================================= -->
 
           <section class="mt-6 grid gap-6 lg:grid-cols-2">
@@ -302,30 +375,31 @@ onMounted(() => {
             <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
               <h2 class="font-bold text-slate-900">Statistik Kritik</h2>
 
-              <div class="mt-6">
+              <div
+                v-if="categoryChartData.length === 0"
+                class="mt-6 py-10 text-center text-sm text-slate-400"
+              >
+                Belum ada kategori kritik & saran.
+              </div>
+
+              <div v-else class="mt-6">
                 <div class="flex h-52 items-end justify-around gap-5">
-                  <div class="flex h-full flex-1 flex-col justify-end">
-                    <div class="h-[35%] rounded-t-xl bg-[#FF9343]"></div>
+                  <div
+                    v-for="cat in categoryChartData"
+                    :key="cat.id"
+                    class="flex h-full flex-1 flex-col justify-end"
+                  >
+                    <p class="mb-1 text-center text-xs font-semibold text-slate-600">
+                      {{ cat.kritik }}
+                    </p>
+                    <div
+                      class="rounded-t-xl bg-[#FF9343] transition-all"
+                      :style="{ height: barHeight(cat.kritik, maxKritik) }"
+                    ></div>
 
-                    <p class="mt-2 text-center text-xs text-slate-500">Akademik</p>
-                  </div>
-
-                  <div class="flex h-full flex-1 flex-col justify-end">
-                    <div class="h-[65%] rounded-t-xl bg-[#FF9343]"></div>
-
-                    <p class="mt-2 text-center text-xs text-slate-500">Fasilitas</p>
-                  </div>
-
-                  <div class="flex h-full flex-1 flex-col justify-end">
-                    <div class="h-[48%] rounded-t-xl bg-[#FF9343]"></div>
-
-                    <p class="mt-2 text-center text-xs text-slate-500">Event</p>
-                  </div>
-
-                  <div class="flex h-full flex-1 flex-col justify-end">
-                    <div class="h-[25%] rounded-t-xl bg-[#FF9343]"></div>
-
-                    <p class="mt-2 text-center text-xs text-slate-500">Lainnya</p>
+                    <p class="mt-2 truncate text-center text-xs text-slate-500" :title="cat.name">
+                      {{ cat.name }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -336,30 +410,31 @@ onMounted(() => {
             <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
               <h2 class="font-bold text-slate-900">Statistik Saran</h2>
 
-              <div class="mt-6">
+              <div
+                v-if="categoryChartData.length === 0"
+                class="mt-6 py-10 text-center text-sm text-slate-400"
+              >
+                Belum ada kategori kritik & saran.
+              </div>
+
+              <div v-else class="mt-6">
                 <div class="flex h-52 items-end justify-around gap-5">
-                  <div class="flex h-full flex-1 flex-col justify-end">
-                    <div class="h-[40%] rounded-t-xl bg-[#FF9343]"></div>
+                  <div
+                    v-for="cat in categoryChartData"
+                    :key="cat.id"
+                    class="flex h-full flex-1 flex-col justify-end"
+                  >
+                    <p class="mb-1 text-center text-xs font-semibold text-slate-600">
+                      {{ cat.saran }}
+                    </p>
+                    <div
+                      class="rounded-t-xl bg-[#FF9343] transition-all"
+                      :style="{ height: barHeight(cat.saran, maxSaran) }"
+                    ></div>
 
-                    <p class="mt-2 text-center text-xs text-slate-500">Akademik</p>
-                  </div>
-
-                  <div class="flex h-full flex-1 flex-col justify-end">
-                    <div class="h-[70%] rounded-t-xl bg-[#FF9343]"></div>
-
-                    <p class="mt-2 text-center text-xs text-slate-500">Fasilitas</p>
-                  </div>
-
-                  <div class="flex h-full flex-1 flex-col justify-end">
-                    <div class="h-[50%] rounded-t-xl bg-[#FF9343]"></div>
-
-                    <p class="mt-2 text-center text-xs text-slate-500">Event</p>
-                  </div>
-
-                  <div class="flex h-full flex-1 flex-col justify-end">
-                    <div class="h-[28%] rounded-t-xl bg-[#FF9343]"></div>
-
-                    <p class="mt-2 text-center text-xs text-slate-500">Lainnya</p>
+                    <p class="mt-2 truncate text-center text-xs text-slate-500" :title="cat.name">
+                      {{ cat.name }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -380,7 +455,7 @@ onMounted(() => {
 
               <button
                 type="button"
-                @click="goTo('/voting')"
+                @click="goTo('/admin/voting')"
                 class="inline-flex items-center gap-1 text-xs font-semibold text-[#FF7A00] hover:underline"
               >
                 Lihat semua
@@ -402,7 +477,7 @@ onMounted(() => {
 
                 <tbody>
                   <tr
-                    v-for="voting in votings.slice(0, 5)"
+                    v-for="voting in recentVotings"
                     :key="voting.id"
                     class="border-b border-slate-50 last:border-0"
                   >
@@ -411,20 +486,25 @@ onMounted(() => {
                     </td>
 
                     <td class="px-4 py-4 text-sm text-slate-500">
-                      {{ voting.start_date }} -
-                      {{ voting.end_date }}
+                      {{ formatDate(voting.start_date) }} -
+                      {{ formatDate(voting.end_date) }}
                     </td>
 
                     <td class="px-4 py-4">
                       <span
-                        class="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-600"
+                        class="rounded-full px-3 py-1 text-xs font-semibold"
+                        :class="
+                          voting.status_code
+                            ? 'bg-green-50 text-green-600'
+                            : 'bg-red-50 text-red-500'
+                        "
                       >
-                        Aktif
+                        {{ voting.status_code ? 'Aktif' : 'Nonaktif' }}
                       </span>
                     </td>
                   </tr>
 
-                  <tr v-if="!votings.length">
+                  <tr v-if="!recentVotings.length">
                     <td colspan="3" class="px-4 py-8 text-center text-sm text-slate-400">
                       Belum ada data voting.
                     </td>

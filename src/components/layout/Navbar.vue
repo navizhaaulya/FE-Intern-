@@ -106,7 +106,7 @@ const goToProfile = () => {
   if (!user.value) return
 
   if (user.value.role_code === 'admin') {
-    router.push('/admin')
+    router.push('/profile')
     return
   }
 

@@ -1,5 +1,6 @@
 <script setup>
-import { Eye, Pencil, Trash2, Star } from 'lucide-vue-next'
+import { ref, computed, watch } from 'vue'
+import { Eye, Pencil, Trash2, Star, Trash, ListChecks, X } from 'lucide-vue-next'
 import StatusBadge from '@/components/UI/StatusBadge.vue'
 
 const props = defineProps({
@@ -10,11 +11,59 @@ const props = defineProps({
   itemsPerPage: { type: Number, default: 10 },
   totalPages: { type: Number, default: 1 },
   actions: { type: Array, default: () => ['detail', 'edit', 'delete'] },
-  // key di item yang nandain status highlight, biar bintangnya kesorot kuning
   highlightKey: { type: String, default: '' },
+  selectable: { type: Boolean, default: null },
 })
 
-const emit = defineEmits(['detail', 'edit', 'delete', 'highlight', 'page-change'])
+const emit = defineEmits(['detail', 'edit', 'delete', 'highlight', 'page-change', 'bulk-delete'])
+
+const canSelect = computed(() =>
+  props.selectable === null ? props.actions.includes('delete') : props.selectable
+)
+
+const pickMode = ref(false)
+const selectedIds = ref([])
+
+const togglePickMode = () => {
+  pickMode.value = !pickMode.value
+  selectedIds.value = []
+}
+
+const isSelected = (id) => selectedIds.value.includes(id)
+
+const toggleOne = (id) => {
+  if (isSelected(id)) {
+    selectedIds.value = selectedIds.value.filter((x) => x !== id)
+  } else {
+    selectedIds.value = [...selectedIds.value, id]
+  }
+}
+
+const allSelected = computed(
+  () => props.items.length > 0 && selectedIds.value.length === props.items.length
+)
+
+const toggleAll = () => {
+  selectedIds.value = allSelected.value ? [] : props.items.map((item) => item.id)
+}
+
+watch(
+  () => props.items,
+  () => {
+    selectedIds.value = []
+  }
+)
+
+const triggerBulkDelete = () => {
+  emit('bulk-delete', [...selectedIds.value])
+}
+
+const clearSelection = () => {
+  selectedIds.value = []
+  pickMode.value = false
+}
+
+defineExpose({ clearSelection })
 
 const formatDate = (date) => {
   if (!date) return '-'
@@ -31,25 +80,15 @@ const getValue = (item, column) => {
   if (column.type === 'image') {
     if (typeof value === 'object' && value !== null) {
       const rawUrl = value.tumbnail_url || value.url || ''
-
       if (!rawUrl) return ''
-
-      if (rawUrl.startsWith('http')) {
-        return rawUrl
-      }
-
+      if (rawUrl.startsWith('http')) return rawUrl
       const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
-
       return `${baseUrl}/${rawUrl.replace(/^\/+/, '')}`
     }
 
     if (typeof value === 'string') {
-      if (value.startsWith('http')) {
-        return value
-      }
-
+      if (value.startsWith('http')) return value
       const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
-
       return `${baseUrl}/${value.replace(/^\/+/, '')}`
     }
 
@@ -66,13 +105,64 @@ const getBadge = (item, column) => {
 }
 
 const changePage = (page, totalPages) => {
-  if (page < 1 || page > totalPages) return
-  emit('page-change', page)
+  const target = Number(page)
+  if (target < 1 || target > totalPages) return
+  emit('page-change', target)
 }
 </script>
 
 <template>
   <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <!-- TOOLBAR -->
+    <div
+      v-if="canSelect"
+      class="flex items-center justify-between border-b border-gray-100 px-5 py-3 transition-colors duration-200"
+      :class="pickMode && selectedIds.length > 0 ? 'bg-orange-50' : 'bg-gray-50'"
+    >
+      <Transition name="fade" mode="out-in">
+        <p
+          v-if="pickMode && selectedIds.length > 0"
+          key="selected"
+          class="text-sm font-medium text-orange-700"
+        >
+          {{ selectedIds.length }} data dipilih
+        </p>
+        <p v-else-if="pickMode" key="hint" class="text-sm text-gray-500">
+          Centang data yang ingin dihapus
+        </p>
+        <p v-else key="default" class="text-sm text-gray-500">
+          Pilih beberapa data sekaligus untuk dihapus
+        </p>
+      </Transition>
+
+      <div class="flex items-center gap-2">
+        <Transition name="fade">
+          <button
+            v-if="pickMode && selectedIds.length > 0"
+            @click="triggerBulkDelete"
+            class="flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
+          >
+            <Trash :size="15" />
+            Hapus Terpilih ({{ selectedIds.length }})
+          </button>
+        </Transition>
+
+        <button
+          @click="togglePickMode"
+          class="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors duration-200"
+          :class="
+            pickMode
+              ? 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50'
+              : 'border-orange-300 bg-orange-50 text-orange-600 hover:bg-orange-100'
+          "
+        >
+          <X v-if="pickMode" :size="15" />
+          <ListChecks v-else :size="15" />
+          {{ pickMode ? 'Batal Pilih' : 'Pilih Data' }}
+        </button>
+      </div>
+    </div>
+
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-gray-50 border-b border-gray-200">
@@ -86,10 +176,20 @@ const changePage = (page, totalPages) => {
               {{ column.label }}
             </th>
             <th
-              v-if="actions.length > 0"
+              v-if="actions.length > 0 || canSelect"
               class="px-5 py-4 text-center text-sm font-semibold text-gray-600"
             >
-              Aksi
+              <Transition name="fade" mode="out-in">
+                <div v-if="pickMode" key="checkbox" class="flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    :checked="allSelected"
+                    @change="toggleAll"
+                    class="h-4 w-4 rounded accent-orange-500"
+                  />
+                </div>
+                <span v-else key="label">Aksi</span>
+              </Transition>
             </th>
           </tr>
         </thead>
@@ -111,7 +211,8 @@ const changePage = (page, totalPages) => {
             v-for="(item, index) in items"
             v-else
             :key="item.id"
-            class="border-b border-gray-100 hover:bg-gray-50"
+            class="border-b border-gray-100 transition-colors duration-200 hover:bg-gray-50"
+            :class="pickMode && isSelected(item.id) ? 'bg-orange-50/60' : ''"
           >
             <td class="px-5 py-4 text-sm text-gray-600">
               {{ (currentPage - 1) * itemsPerPage + index + 1 }}
@@ -154,45 +255,58 @@ const changePage = (page, totalPages) => {
               <template v-else>{{ getValue(item, column) || '-' }}</template>
             </td>
 
-            <td v-if="actions.length > 0" class="px-5 py-4">
-              <div class="flex items-center justify-center gap-2">
-                <button
-                  v-if="actions.includes('detail')"
-                  @click="emit('detail', item.id)"
-                  class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                  title="Detail"
-                >
-                  <Eye :size="18" />
-                </button>
-                <button
-                  v-if="actions.includes('edit')"
-                  @click="emit('edit', item.id)"
-                  class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-orange-500"
-                  title="Edit"
-                >
-                  <Pencil :size="18" />
-                </button>
-                <button
-                  v-if="actions.includes('delete')"
-                  @click="emit('delete', item.id)"
-                  class="p-2 rounded-lg text-red-500 hover:bg-red-50"
-                  title="Hapus"
-                >
-                  <Trash2 :size="18" />
-                </button>
-                <button
-                  v-if="actions.includes('highlight')"
-                  @click="emit('highlight', item.id)"
-                  class="p-2 rounded-lg hover:bg-yellow-50"
-                  :class="highlightKey && item[highlightKey] ? 'text-yellow-400' : 'text-gray-400'"
-                  title="Jadikan Highlight"
-                >
-                  <Star
-                    :size="18"
-                    :fill="highlightKey && item[highlightKey] ? 'currentColor' : 'none'"
+            <td v-if="actions.length > 0 || canSelect" class="px-5 py-4">
+              <Transition name="fade" mode="out-in">
+                <div v-if="pickMode" key="checkbox" class="flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    :checked="isSelected(item.id)"
+                    @change="toggleOne(item.id)"
+                    class="h-4 w-4 rounded accent-orange-500"
                   />
-                </button>
-              </div>
+                </div>
+
+                <div v-else key="actions" class="flex items-center justify-center gap-2">
+                  <button
+                    v-if="actions.includes('detail')"
+                    @click="emit('detail', item.id)"
+                    class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                    title="Detail"
+                  >
+                    <Eye :size="18" />
+                  </button>
+                  <button
+                    v-if="actions.includes('edit')"
+                    @click="emit('edit', item.id)"
+                    class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-orange-500"
+                    title="Edit"
+                  >
+                    <Pencil :size="18" />
+                  </button>
+                  <button
+                    v-if="actions.includes('delete')"
+                    @click="emit('delete', item.id)"
+                    class="p-2 rounded-lg text-red-500 hover:bg-red-50"
+                    title="Hapus"
+                  >
+                    <Trash2 :size="18" />
+                  </button>
+                  <button
+                    v-if="actions.includes('highlight')"
+                    @click="emit('highlight', item.id)"
+                    class="p-2 rounded-lg hover:bg-yellow-50"
+                    :class="
+                      highlightKey && item[highlightKey] ? 'text-yellow-400' : 'text-gray-400'
+                    "
+                    title="Jadikan Highlight"
+                  >
+                    <Star
+                      :size="18"
+                      :fill="highlightKey && item[highlightKey] ? 'currentColor' : 'none'"
+                    />
+                  </button>
+                </div>
+              </Transition>
             </td>
           </tr>
         </tbody>
@@ -236,3 +350,14 @@ const changePage = (page, totalPages) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
